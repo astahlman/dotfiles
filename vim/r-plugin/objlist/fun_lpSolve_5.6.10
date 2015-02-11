@@ -1,0 +1,4 @@
+syn keyword rFunction lp
+syn keyword rFunction lp.assign
+syn keyword rFunction lp.transport
+syn keyword rFunction make.q8

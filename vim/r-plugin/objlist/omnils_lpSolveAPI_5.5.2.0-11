@@ -1,0 +1,56 @@
+add.columnfunctionfunctionlpSolveAPIlprec	x	indices
+add.constraintfunctionfunctionlpSolveAPIlprec	xt	typec("<=", "=", ">=")	rhs	indices	lhs
+add.SOSfunctionfunctionlpSolveAPIlprec	name	type	priority	columns	weights
+delete.columnfunctionfunctionlpSolveAPIlprec	columns
+delete.constraintfunctionfunctionlpSolveAPIlprec	constraints
+delete.lpfunctionfunctionlpSolveAPIlprec
+dim.lpExtPtrfunctionfunctionlpSolveAPIx
+dim<-.lpExtPtrfunctionfunctionlpSolveAPIx	value
+dimnames.lpExtPtrfunctionfunctionlpSolveAPIx
+dimnames<-.lpExtPtrfunctionfunctionlpSolveAPIx	value
+get.basisfunctionfunctionlpSolveAPIlprec	nonbasicFALSE
+get.boundsfunctionfunctionlpSolveAPIlprec	columns1:n
+get.branch.modefunctionfunctionlpSolveAPIlprec	columns1:n	as.charTRUE
+get.columnfunctionfunctionlpSolveAPIlprec	column
+get.constr.typefunctionfunctionlpSolveAPIlprec	constraints1:m	as.charTRUE
+get.constr.valuefunctionfunctionlpSolveAPIlprec	sidec("rhs", "lhs")	constraints1:m
+get.constraintsfunctionfunctionlpSolveAPIlprec
+get.dual.solutionfunctionfunctionlpSolveAPIlprec
+get.kindfunctionfunctionlpSolveAPIlprec	columns1:n
+get.matfunctionfunctionlpSolveAPIlprec	i	j
+get.objectivefunctionfunctionlpSolveAPIlprec
+get.primal.solutionfunctionfunctionlpSolveAPIlprec	origFALSE
+get.rhsfunctionfunctionlpSolveAPIlprec	constraints1:m
+get.sensitivity.objfunctionfunctionlpSolveAPIlprec
+get.sensitivity.objexfunctionfunctionlpSolveAPIlprec
+get.sensitivity.rhsfunctionfunctionlpSolveAPIlprec
+get.solutioncountfunctionfunctionlpSolveAPIlprec
+get.total.iterfunctionfunctionlpSolveAPIlprec
+get.total.nodesfunctionfunctionlpSolveAPIlprec
+get.typefunctionfunctionlpSolveAPIlprec	columns1:n	as.charTRUE
+get.variablesfunctionfunctionlpSolveAPIlprec
+guess.basisfunctionfunctionlpSolveAPIlprec	guess
+lp.controlfunctionfunctionlpSolveAPIlprec	...	resetFALSE
+make.lpfunctionfunctionlpSolveAPInrow0	ncol0	verbose"neutral"
+name.lpfunctionfunctionlpSolveAPIlprec	name
+plot.lpExtPtrfunctionfunctionlpSolveAPIx	y	...
+print.lpExtPtrfunctionfunctionlpSolveAPIx	...
+read.lpfunctionfunctionlpSolveAPIfilename	typec("lp", "mps", "freemps")	verbose"neutral"	options
+resize.lpfunctionfunctionlpSolveAPIlprec	nrow	ncol
+row.add.modefunctionfunctionlpSolveAPIlprec	state
+select.solutionfunctionfunctionlpSolveAPIlprec	solution
+set.basisfunctionfunctionlpSolveAPIlprec	basis	nonbasicFALSE	defaultFALSE
+set.boundsfunctionfunctionlpSolveAPIlprec	lowerNULL	upperNULL	columns1:n
+set.branch.modefunctionfunctionlpSolveAPIlprec	columns	modes
+set.branch.weightsfunctionfunctionlpSolveAPIlprec	weights
+set.columnfunctionfunctionlpSolveAPIlprec	column	x	indices
+set.constr.typefunctionfunctionlpSolveAPIlprec	types	constraints1:m
+set.constr.valuefunctionfunctionlpSolveAPIlprec	rhsNULL	lhsNULL	constraints1:m
+set.matfunctionfunctionlpSolveAPIlprec	i	j	value
+set.objfnfunctionfunctionlpSolveAPIlprec	obj	indices
+set.rhsfunctionfunctionlpSolveAPIlprec	b	constraints1:m
+set.rowfunctionfunctionlpSolveAPIlprec	row	xt	indices
+set.semicontfunctionfunctionlpSolveAPIlprec	columns	scTRUE
+set.typefunctionfunctionlpSolveAPIlprec	columns	typec("integer", "binary", "real")
+solve.lpExtPtrfunctionfunctionlpSolveAPIa	b	...
+write.lpfunctionfunctionlpSolveAPIlprec	filename	typec("lp", "mps", "freemps")	use.namesc(TRUE, TRUE)
