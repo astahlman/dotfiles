@@ -1,0 +1,5 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: brace matching in Latex, e.g. \left( \right), \left[ \right], 
+# key: brace
+# --
+\left${1:\(} $0 \right${1:$(matching-brace yas-text)}
