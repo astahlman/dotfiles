@@ -7,24 +7,11 @@ export ZSH=$HOME/.oh-my-zsh
 # time that oh-my-zsh is loaded.
 ZSH_THEME="robbyrussell"
 
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
 # Uncomment the following line to disable bi-weekly auto-update checks.
 # DISABLE_AUTO_UPDATE="true"
 
 # Uncomment the following line to change how often to auto-update (in days).
 # export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to disable command auto-correction.
 # DISABLE_CORRECTION="true"
@@ -36,11 +23,6 @@ ZSH_THEME="robbyrussell"
 # under VCS as dirty. This makes repository status check for large repositories
 # much, much faster.
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# HIST_STAMPS="mm/dd/yyyy"
 
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
@@ -75,14 +57,18 @@ export PATH="/usr/local/bin:/usr/local/heroku/bin:/usr/bin:/bin:/usr/sbin:/sbin:
 export PATH=$PATH:~/Documents/Programming/Tools/adt-bundle-mac-x86_64-20130219/sdk/platform-tools
 set -o vi
 
+# Move to local
 export CLOJURESCRIPT_HOME=/Users/astahlman/Documents/Programming/Web/clojurescript
 
+# Move to local
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
 
+# Move to local
 ### For scrapy ###
 export PATH=$PATH:/usr/local/share/python
 
+# Move to local
 ### For tex ###
 export PATH=$PATH:/usr/local/texlive/2014/bin/universal-darwin
 
@@ -111,6 +97,7 @@ function marks {
 }
 
 export PATH=/usr/local/bin:$PATH
+#move to local
 export JASPER_HOME=/Users/astahlman/Documents/Programming/Python/my-jasper
 
 bindkey "^R" history-incremental-search-backward
@@ -134,3 +121,15 @@ xterm*|rxvt*|eterm*|screen*)
     ;;
 esac
 
+# Specific to OS X
+function ppjson {
+    cat $1 | python -m json.tool 
+}
+
+autoload -U compinit
+compinit
+
+#allow tab completion in the middle of a word
+setopt COMPLETE_IN_WORD
+
+source "$HOME/dotfiles/zshrc_local"
