@@ -102,7 +102,7 @@
 (add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
 
 ; Multilingual Text Input mode
-(set-input-method 'latin-1-prefix)
+;(set-input-method 'latin-1-prefix)
 
 ;; Google Translate plugin
 (require 'google-translate)
