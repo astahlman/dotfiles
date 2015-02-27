@@ -1,4 +1,35 @@
 ;; This is where your customizations should live
+(setq my-packages
+  '( math-symbol-lists ac-math muse
+                       paredit async pkg-info auctex
+                       popup auto-complete projectile
+                       cider queue cl-lib rainbow-delimiters
+                       clojure-mode clojure-test-mode s
+                       dash elisp-slime-nav smex epl
+                       starter-kit ess
+                       starter-kit-eshell exec-path-from-shell
+                       starter-kit-bindings find-file-in-project
+                       starter-kit-lisp
+                       google-translate
+                       helm
+                       highlight-indentation idle-highlight-mode
+                       ido-ubiquitous w3m latex-preview-pane
+                       yasnippet magit solarized-theme))
+
+(defun my-packages-installed-p ()
+  (loop for p in my-packages
+        when (not (package-installed-p p)) do (return nil)
+        finally (return t)))
+
+(unless (my-packages-installed-p)
+  ;; check for new packages (package versions)
+  (message "%s" "Refreshing package database...")
+  (package-refresh-contents)
+  (message "%s" " done.")
+  ;; install the missing packages
+  (dolist (p my-packages)
+    (when (not (package-installed-p p))
+      (package-install p))))
 
 ;; env PATH
 (defun set-exec-path-from-shell-PATH ()
