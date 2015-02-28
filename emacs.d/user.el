@@ -16,20 +16,24 @@
                        ido-ubiquitous w3m latex-preview-pane
                        yasnippet magit solarized-theme))
 
-(defun my-packages-installed-p ()
-  (loop for p in my-packages
-        when (not (package-installed-p p)) do (return nil)
-        finally (return t)))
+;; Activate all the packages
+(package-initialize)
 
-(unless (my-packages-installed-p)
-  ;; check for new packages (package versions)
-  (message "%s" "Refreshing package database...")
-  (package-refresh-contents)
-  (message "%s" " done.")
-  ;; install the missing packages
-  (dolist (p my-packages)
-    (when (not (package-installed-p p))
-      (package-install p))))
+;; Fetch list of packages available
+(or (file-exists-p package-user-dir)
+    (package-refresh-contents))
+
+; Install anything that's missing
+(dolist (package my-packages)
+  (unless (package-installed-p package)
+    (message "Installing %s..." package)
+    (package-install package)
+    (message "Done.")))
+
+;; https://github.com/purcell/exec-path-from-shell
+(require 'exec-path-from-shell)
+(when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize))
 
 ;; env PATH
 (defun set-exec-path-from-shell-PATH ()

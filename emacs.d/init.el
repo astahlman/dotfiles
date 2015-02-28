@@ -14,8 +14,6 @@
   (normal-top-level-add-to-load-path '("."))
   (normal-top-level-add-subdirs-to-load-path))
 
-(require 'exec-path-from-shell)
-(when (memq window-system '(mac ns))
-  (exec-path-from-shell-initialize))
+
 (setq exec-path (append exec-path '("~/.emacs.d/elpa")))
 (load "~/.emacs.d/user.el")
