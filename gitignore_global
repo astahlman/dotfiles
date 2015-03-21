@@ -40,3 +40,7 @@ Thumbs.db
 # Emacs #
 #########
 \#*#
+
+# R #
+#####
+.Rhistory
