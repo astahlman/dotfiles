@@ -11,7 +11,7 @@
                        starter-kit-bindings find-file-in-project
                        starter-kit-lisp
                        google-translate
-                       helm
+                       helm markdown-mode
                        highlight-indentation idle-highlight-mode
                        ido-ubiquitous w3m latex-preview-pane
                        yasnippet magit solarized-theme))
@@ -122,6 +122,7 @@
   (describe-function (symbol-at-point)))
 
 (global-set-key (kbd "C-h SPC") 'help-at-point)
+(global-set-key (kbd "C-x TAB") 'indent-rigidly)
 
 ; my muse customisations
 (load "~/.emacs.d/my-muse.el")
@@ -195,4 +196,17 @@
 (require 'yasnippet)
 (yas-global-mode 1)
 
+(defun fmt-epoch (&optional epoch)
+  "Prints a human readable date given an epoch time in milliseconds"
+  (interactive "P")
+  (let ((millis (or
+                 (when current-prefix-arg (string-to-number (read-from-minibuffer "Millis: ")))
+                 epoch
+                 (string-to-number (thing-at-point 'word)))))
+    (message (format-time-string "%Y-%m-%d %T UTC" (seconds-to-time (/ millis 1000))))))
 
+(autoload 'markdown-mode "markdown-mode"
+   "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
