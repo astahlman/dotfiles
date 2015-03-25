@@ -12,6 +12,7 @@
                        starter-kit-lisp
                        google-translate
                        helm markdown-mode
+                       helm inf-ruby
                        highlight-indentation idle-highlight-mode
                        ido-ubiquitous w3m latex-preview-pane
                        yasnippet magit solarized-theme))
@@ -125,6 +126,7 @@
 (global-set-key (kbd "C-x TAB") 'indent-rigidly)
 
 ; my muse customisations
+; TODO: Fix this path on work laptop...
 (load "~/.emacs.d/my-muse.el")
 
 ; eshell autocompletion
@@ -210,3 +212,6 @@
 (add-to-list 'auto-mode-alist '("\\.text\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
+;Temporary workaround - see https://github.com/technomancy/emacs-starter-kit/issues/99
+(remove-hook 'ruby-mode-hook 'esk-run-coding-hook)
