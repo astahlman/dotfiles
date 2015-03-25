@@ -127,7 +127,7 @@
 
 ; my muse customisations
 ; TODO: Fix this path on work laptop...
-(load "~/.emacs.d/my-muse.el")
+;(load "~/.emacs.d/my-muse.el")
 
 ; eshell autocompletion
 (add-hook

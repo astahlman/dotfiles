@@ -44,3 +44,7 @@ Thumbs.db
 # R #
 #####
 .Rhistory
+
+# Intellij #
+############
+.idea*
