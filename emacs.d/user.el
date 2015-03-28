@@ -213,5 +213,10 @@
 (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
+
 ;Temporary workaround - see https://github.com/technomancy/emacs-starter-kit/issues/99
 (remove-hook 'ruby-mode-hook 'esk-run-coding-hook)
+
+;; Turn on Helm
+(global-set-key (kbd "M-x") 'helm-M-x)
+
