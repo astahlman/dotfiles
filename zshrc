@@ -132,4 +132,7 @@ compinit
 #allow tab completion in the middle of a word
 setopt COMPLETE_IN_WORD
 
+# expand aliases in non-interactive terminals
+setopt aliases
+
 source "$HOME/dotfiles/zshrc_local"
