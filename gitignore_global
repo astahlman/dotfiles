@@ -49,3 +49,7 @@ Thumbs.db
 # Intellij #
 ############
 .idea*
+
+# Vi #
+#####
+*.swp

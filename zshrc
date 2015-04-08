@@ -97,8 +97,6 @@ function marks {
 }
 
 export PATH=/usr/local/bin:$PATH
-#move to local
-export JASPER_HOME=/Users/astahlman/Documents/Programming/Python/my-jasper
 
 bindkey "^R" history-incremental-search-backward
 
@@ -134,5 +132,8 @@ setopt COMPLETE_IN_WORD
 
 # expand aliases in non-interactive terminals
 setopt aliases
+
+# Generate a random 32-character string
+alias make-password="openssl rand -base64 32 | head -c 32"
 
 source "$HOME/dotfiles/zshrc_local"

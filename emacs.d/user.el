@@ -4,7 +4,7 @@
                        paredit async pkg-info auctex
                        popup auto-complete projectile
                        cider queue cl-lib rainbow-delimiters
-                       clojure-mode clojure-test-mode s
+                       clojure-mode clojure-test-mode cljdoc s
                        dash elisp-slime-nav smex epl
                        starter-kit ess
                        starter-kit-eshell exec-path-from-shell
@@ -12,10 +12,11 @@
                        starter-kit-lisp
                        google-translate
                        helm markdown-mode
-                       helm inf-ruby
+                       helm-ag inf-ruby
                        highlight-indentation idle-highlight-mode
                        ido-ubiquitous w3m latex-preview-pane
-                       yasnippet magit solarized-theme))
+                       yasnippet magit solarized-theme
+                       evil evil-leader))
 
 ;; Activate all the packages
 (package-initialize)
@@ -219,4 +220,41 @@
 
 ;; Turn on Helm
 (global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
 
+;; Saner regexp syntax, as recommended by
+;; http://www.masteringemacs.org/article/re-builder-interactive-regexp-builder
+(require 're-builder)
+(setq reb-re-syntax 'string)
+
+;; http://stackoverflow.com/questions/3669511/the-function-to-show-current-files-full-path-in-mini-buffer
+(setq frame-title-format
+      (list (format "%s %%S: %%j " (system-name))
+        '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
+
+;; Turn on evil-mode
+(load "~/.emacs.d/evil.el")
+
+;; TODO: Move this to some Clojure specific file
+(add-hook 'clojure-mode-hook
+          (lambda () (local-set-key (kbd "C-h SPC") 'cider-doc-at-point)))
+
+(defun cider-doc-at-point ()
+  "Send the symbol at point to the cider repl
+   e.g., (doc $thing-at-point). We need to
+   (use 'clojure.repl) before this will work"
+  (interactive)
+  (let* ((thing (thing-at-point 'symbol))
+         (doc-fn (concat "(doc " thing ")")))
+    (save-excursion
+      (other-window 1)
+      (end-of-buffer)
+      (insert doc-fn)
+      (cider-repl-return))))
+
+
+;;;; TO WRITE ;;;;
+;; Write or find these functions online, as they would probably be useful
+(defun fuzzy-find-buff (name)
+  (interactive)
+  "Returns a possibly empty list of buffers whose name partially matches NAME")
