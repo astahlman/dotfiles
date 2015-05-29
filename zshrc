@@ -136,4 +136,35 @@ setopt aliases
 # Generate a random 32-character string
 alias make-password="openssl rand -base64 32 | head -c 32"
 
+# Randomly sample a file
+function sample {
+    if  [[ $# -eq 2 ]]; then
+        cmd="awk 'BEGIN {srand()} !/^\$/ { if (rand() <= $1) print \$0}' $2"
+    elif [[ $# -eq 1 ]]; then
+        cmd="awk 'BEGIN {srand()} !/^\$/ { if (rand() <= $1) print \$0}'"
+    else
+        echo Usage: sample $ratio [ $filename ]
+    fi
+    eval "$cmd"
+}
+
+function pop-alert {
+    command -v terminal-notifier >/dev/null 2>&1 || { echo >&2 "terminal-notifier is not installed. Aborting..."; exit 1; };
+    terminal-notifier -title $1 -message $2
+}
+
+function alert-when-finished {
+    start=$(date +%s)
+    if eval "$@"; then
+        title="Command Finished"
+    else
+        title="Command Failed"
+    fi
+    msg="Elapsed: $(($(date +%s) - $start)) seconds"
+    pop-alert $title $msg
+}
+
+alias awf="alert-when-finished"
+
 source "$HOME/dotfiles/zshrc_local"
+
