@@ -5,7 +5,8 @@
 [core]
 	pager = less -FMRiX
 	excludesfile = ~/dotfiles/gitignore_global
+	editor = vim
 [push]
 	default = current
 [include]
-    path = ~/dotfiles/gitconfig_local
+	path = ~/dotfiles/gitconfig_local

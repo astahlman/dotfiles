@@ -21,13 +21,15 @@
                        yasnippet
                        ;magit ; This causes problems on Emacs < 24,
                        solarized-theme
-                       ;evil evil-leader
                        buffer-move
                        org
                        org-bullets
                        org-beautify-theme
                        smart-mode-line
-                       htmlize))
+                       htmlize
+                       json-mode
+                       yaml-mode
+                       ox-mediawiki))
 
 ;; Activate all the packages
 (package-initialize)
@@ -100,9 +102,6 @@
 
 ;; Save here instead of littering current directory with emacs backup files
 (setq backup-directory-alist `(("." . "~/.saves")))
-
-;; Turn on evil-mode
-;(load "~/.emacs.d/evil.el")
 
 ;; Load ESS for R
 ;ess-mode configuration
@@ -189,8 +188,9 @@
 (defun start-jrepl ()
   "Start a Java REPL"
   (interactive)
-  (let ((jar "/Users/astahlman/Documents/Programming/Tools/java-repl/build/artifacts/javarepl-dev.build.jar")
-        buff (buffer-name)) ; TODO: why is this nil?
+  (let ((jar "~/Documents/Tools/java-repl/build/artifacts/javarepl-dev.build.jar")
+                                        ;(jar "/Users/astahlman/Documents/Programming/Tools/java-repl/build/artifacts/javarepl-dev.build.jar") ;; FIXME
+        (buff (buffer-name)))          ; TODO: why is this nil?
     (pop-to-buffer (get-buffer-create (generate-new-buffer-name "*jrepl*")))
     (shell (current-buffer))
     (process-send-string nil (concat "java -jar " jar "\n"))
@@ -250,40 +250,9 @@
       (list (format "%s %%S: %%j " (system-name))
         '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
 
-
 ;; TODO: Move this to some Clojure specific file
 (add-hook 'clojure-mode-hook
           (lambda () (local-set-key (kbd "C-h SPC") 'cider-doc-at-point)))
-
-;;  (defun squash-evil ()
-;;   "Get an Emacs-y looking cursor back and turn off Evil"
-;;   (setq cursor-type 'bar)
-;;   (set-cursor-color "red")
-;;   (evil-local-mode 0))
-
-;; (defadvice switch-to-buffer (after defeat-evil-in-paredit activate)
-;;   "Turn off Evil if we are in Paredit mode."
-;;   (when (and evil-mode paredit-mode)
-;;     (let* ((arg0 (ad-get-arg 0))
-;;            (buffer (if arg0 (get-buffer arg0) (other-buffer))))
-;;       (when buffer
-;;         (with-current-buffer buffer
-;;           (squash-evil))))))
-
-;; ;; Let's not use evil-mode to edit Lisp-y things
-;; (defadvice paredit-mode (around paredit-disable-evil activate)
-;;   (if paredit-mode
-;;       ad-do-it
-;;     (when evil-mode
-;;       (progn
-;;         (turn-off-evil-mode)
-;;         (setq cursor-type 'bar)
-;;         (set-cursor-color "red")
-;;         ad-do-it))))
-;; (add-hook 'paredit-mode-hook (lambda ()
-;;                                (turn-off-evil-mode)
-;;                                (setq cursor-type 'bar)
-;;                                (setcursor-color "red")))
 
 (defun cider-doc-at-point ()
   "Send the symbol at point to the cider repl
@@ -379,3 +348,31 @@
 ; http://tonyballantyne.com/tech/elpa-org-mode-and-invalid-function-org-with-silent-modifications/
 
 (setq org-confirm-babel-evaluate nil)
+
+(defun kill-isearch-match ()
+  "Kill the current isearch match string and continue searching."
+  (interactive)
+  (kill-region isearch-other-end (point)))
+
+(define-key isearch-mode-map [(control k)] 'kill-isearch-match)
+
+(defun send-to-cider ()
+  "If region is active, send it to the other window (presumably Cider).
+   If no region is active, send the current line to the other window."
+  (interactive)
+  (let ((content (if (use-region-p)
+                      (buffer-substring (mark) (point))
+                    (thing-at-point 'sexp))))
+    (progn
+      (other-window 1)
+      (end-of-buffer)
+      (insert content))))
+
+(global-set-key (kbd "C-c C-s") 'send-to-cider)
+
+;; TODO: Come up with some sort of directory structure and autoload
+;; things like this
+(load "~/.emacs.d/org-extensions.el")
+
+;; Load everything that's machine-specific
+(load "~/.emacs.d/user_local.el")
