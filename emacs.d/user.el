@@ -1,6 +1,9 @@
+;; TODO: Bootstrap this...
+(require 'epl)
+
 ;; This is where your customizations should live
 (setq my-packages
-  '( math-symbol-lists ac-math muse
+  '(math-symbol-lists ac-math muse
                        paredit async pkg-info auctex
                        popup auto-complete projectile
                        cider queue cl-lib rainbow-delimiters
@@ -15,8 +18,16 @@
                        helm-ag inf-ruby
                        highlight-indentation idle-highlight-mode
                        ido-ubiquitous w3m latex-preview-pane
-                       yasnippet magit solarized-theme
-                       evil evil-leader))
+                       yasnippet
+                       ;magit ; This causes problems on Emacs < 24,
+                       solarized-theme
+                       ;evil evil-leader
+                       buffer-move
+                       org
+                       org-bullets
+                       org-beautify-theme
+                       smart-mode-line
+                       htmlize))
 
 ;; Activate all the packages
 (package-initialize)
@@ -26,8 +37,10 @@
     (package-refresh-contents))
 
 ; Install anything that's missing
+; Take the latest version of built-in packages, e.g. org
 (dolist (package my-packages)
-  (unless (package-installed-p package)
+  (unless (and (package-installed-p package)
+               (not (epl-package-outdated-p package)))
     (message "Installing %s..." package)
     (package-install package)
     (message "Done.")))
@@ -88,6 +101,8 @@
 ;; Save here instead of littering current directory with emacs backup files
 (setq backup-directory-alist `(("." . "~/.saves")))
 
+;; Turn on evil-mode
+;(load "~/.emacs.d/evil.el")
 
 ;; Load ESS for R
 ;ess-mode configuration
@@ -202,11 +217,14 @@
 (defun fmt-epoch (&optional epoch)
   "Prints a human readable date given an epoch time in milliseconds"
   (interactive "P")
-  (let ((millis (or
-                 (when current-prefix-arg (string-to-number (read-from-minibuffer "Millis: ")))
-                 epoch
-                 (string-to-number (thing-at-point 'word)))))
-    (message (format-time-string "%Y-%m-%d %T UTC" (seconds-to-time (/ millis 1000))))))
+  (let* ((millis (or
+                  (when current-prefix-arg
+                    (string-to-number (read-from-minibuffer "Millis: ")))
+                  epoch
+                  (string-to-number (thing-at-point 'word))))
+        (formatted (format-time-string "%Y-%m-%d %T UTC" (seconds-to-time (/ millis 1000)))))
+    (message formatted)
+    formatted))
 
 (autoload 'markdown-mode "markdown-mode"
    "Major mode for editing Markdown files" t)
@@ -232,12 +250,40 @@
       (list (format "%s %%S: %%j " (system-name))
         '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
 
-;; Turn on evil-mode
-(load "~/.emacs.d/evil.el")
 
 ;; TODO: Move this to some Clojure specific file
 (add-hook 'clojure-mode-hook
           (lambda () (local-set-key (kbd "C-h SPC") 'cider-doc-at-point)))
+
+;;  (defun squash-evil ()
+;;   "Get an Emacs-y looking cursor back and turn off Evil"
+;;   (setq cursor-type 'bar)
+;;   (set-cursor-color "red")
+;;   (evil-local-mode 0))
+
+;; (defadvice switch-to-buffer (after defeat-evil-in-paredit activate)
+;;   "Turn off Evil if we are in Paredit mode."
+;;   (when (and evil-mode paredit-mode)
+;;     (let* ((arg0 (ad-get-arg 0))
+;;            (buffer (if arg0 (get-buffer arg0) (other-buffer))))
+;;       (when buffer
+;;         (with-current-buffer buffer
+;;           (squash-evil))))))
+
+;; ;; Let's not use evil-mode to edit Lisp-y things
+;; (defadvice paredit-mode (around paredit-disable-evil activate)
+;;   (if paredit-mode
+;;       ad-do-it
+;;     (when evil-mode
+;;       (progn
+;;         (turn-off-evil-mode)
+;;         (setq cursor-type 'bar)
+;;         (set-cursor-color "red")
+;;         ad-do-it))))
+;; (add-hook 'paredit-mode-hook (lambda ()
+;;                                (turn-off-evil-mode)
+;;                                (setq cursor-type 'bar)
+;;                                (setcursor-color "red")))
 
 (defun cider-doc-at-point ()
   "Send the symbol at point to the cider repl
@@ -252,9 +298,84 @@
       (insert doc-fn)
       (cider-repl-return))))
 
+;; Enable rainbow-delimiters in all programming-related modes
+(require 'rainbow-delimiters)
+(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 
 ;;;; TO WRITE ;;;;
 ;; Write or find these functions online, as they would probably be useful
 (defun fuzzy-find-buff (name)
   (interactive)
   "Returns a possibly empty list of buffers whose name partially matches NAME")
+
+;; Commands to rearrange windows
+(require 'buffer-move)
+
+(global-set-key (kbd "<C-S-up>")     'buf-move-up)
+(global-set-key (kbd "<C-S-down>")   'buf-move-down)
+(global-set-key (kbd "<C-S-left>")   'buf-move-left)
+(global-set-key (kbd "<C-S-right>")  'buf-move-right)
+
+(defun whack-whitespace (arg)
+  "Delete whitespace until the next word.
+   Deletes across newlines if prefixed."
+  (interactive "P")
+  (let ((regex (if arg "[ \t\n]+" "[ \t]+")))
+    (re-search-forward regex nil t)
+    (replace-match "" nil nil)))
+
+(global-set-key (kbd "C-x d") 'whack-whitespace)
+
+;; Courtesy of: http://rejeep.github.io/emacs/elisp/2010/11/16/delete-file-and-buffer-in-emacs.html
+(defun delete-this-buffer-and-file ()
+  "Removes file connected to current buffer and kills buffer."
+  (interactive)
+  (let ((filename (buffer-file-name))
+        (buffer (current-buffer))
+        (name (buffer-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (when (yes-or-no-p "Are you sure you want to remove this file? ")
+        (delete-file filename)
+        (kill-buffer buffer)
+        (message "File '%s' successfully removed" filename)))))
+
+(defun replace-epoch (start end)
+  "Replace any epoch timestamps (in milliseconds) with a human-readable date string"
+  (interactive "r")
+  (save-restriction
+    (narrow-to-region start end)
+    (goto-char (point-min))
+    (while (search-forward-regexp "[0-9]\\{13\\}")
+      (replace-match (concat "\"" (fmt-epoch (string-to-number (match-string 0))) "\"") nil t))))
+
+;; EasyPG for wiki encryption
+(require 'epa-file)
+(epa-file-enable)
+
+;; Load the following languages in Babel
+(org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t)
+        (R . t)
+        (sh . t)
+        (python . t)
+        (clojure . t)
+        (latex . t)))
+
+(require 'ob-clojure)
+(setq org-src-fontify-natively t)
+(setq org-babel-clojure-backend 'cider)
+
+; In case of this message: Invalid function: org-babel-header-args-safe-fn
+; Byte recompile ob-R.el as described at: http://irreal.org/blog/?p=4295
+
+; The Cider API changed recently, so this commit needs to be applied
+; locally in emacs.d/elpa/org-$version/ob-clojure.el until it gets pushed to ELPA:
+; http://orgmode.org/w/org-mode.git?p=org-mode.git;a=commitdiff;h=4eccd7c7b564874e0e13513e06161e657832ef49
+
+; In case of this message: Invalid function: org-with-silent-modifications
+; Re-install org from ELPA *before* any org-functions have been called
+; http://tonyballantyne.com/tech/elpa-org-mode-and-invalid-function-org-with-silent-modifications/
+
+(setq org-confirm-babel-evaluate nil)

@@ -2,7 +2,9 @@
 ;; http://juanjoalvarez.net/es/detail/2014/sep/19/vim-emacsevil-chaotic-migration-guide/
 
 (require 'evil)
-(evil-mode 1)
+;; This is too annoying in Paredit
+;; TODO: Figure out a way to disable evil and revert the cursor anytime Paredit is active
+;;(evil-mode 1)
 
 ;; Change the cursor color depending on what mode we're in
 (setq evil-emacs-state-cursor '("red" box))
@@ -20,4 +22,3 @@
 
 ;; C-u scroll up - feels a little weird not having this be numeric-prefix...
 (define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
-(message "Hello!")
