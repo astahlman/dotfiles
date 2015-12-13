@@ -3,35 +3,63 @@
 
 ;; This is where your customizations should live
 (setq my-packages
-  '(math-symbol-lists ac-math muse
-                       paredit async pkg-info auctex
-                       popup auto-complete projectile
-                       cider queue cl-lib rainbow-delimiters
-                       clojure-mode clojure-test-mode cljdoc s
-                       dash elisp-slime-nav smex epl
-                       starter-kit ess
-                       starter-kit-eshell exec-path-from-shell
-                       starter-kit-bindings find-file-in-project
-                       starter-kit-lisp
-                       google-translate
-                       helm markdown-mode
-                       helm-ag inf-ruby
-                       highlight-indentation idle-highlight-mode
-                       ido-ubiquitous w3m latex-preview-pane
-                       yasnippet
-                       ;magit ; This causes problems on Emacs < 24,
-                       solarized-theme
-                       buffer-move
-                       org
-                       org-bullets
-                       org-beautify-theme
-                       org-mime
-                       smart-mode-line
-                       htmlize
-                       json-mode
-                       yaml-mode
-                       ox-mediawiki
-                       erc-terminal-notifier))
+      '(ac-math
+        async
+        auctex
+        auto-complete
+        buffer-move
+        cider
+        cl-lib
+        cljdoc
+        clojure-mode
+        clojure-test-mode
+        dash
+        elisp-slime-nav
+        epl
+        erc-terminal-notifier
+        ess
+        exec-path-from-shell
+        find-file-in-project
+        google-translate
+        helm
+        helm-ag
+        highlight-indentation
+        htmlize
+        idle-highlight-mode
+        ido-ubiquitous
+        inf-ruby
+        json-mode
+        latex-preview-pane
+        markdown-mode
+        math-symbol-lists
+        muse
+        org-beautify-theme
+        org-bullets
+        org-mime
+        ox-mediawiki
+        paredit
+        pkg-info
+        popup
+        projectile
+        queue
+        rainbow-delimiters
+        s
+        smart-mode-line
+        smex
+        solarized-theme
+        starter-kit
+        starter-kit-bindings
+        starter-kit-eshell
+        starter-kit-lisp
+        w3m
+        yaml-mode
+        yasnippet))
+
+;; This looks weird, but it fixes a weird race condition where
+;; 'epl-package-outdated-p throws an error because package--builtins
+;; doesn't get populated until it 'package-built-in-p gets called with
+;; a built-in package
+(package-built-in-p 'org)
 
 ;; Activate all the packages
 (package-initialize)
@@ -91,8 +119,6 @@
 ;; Flyspell often slows down editing so it's turned off
 (remove-hook 'text-mode-hook 'turn-on-flyspell)
 
-(load "~/.emacs.d/vendor/clojure")
-
 ;; hippie expand - don't try to complete with file names
 (setq hippie-expand-try-functions-list (delete 'try-complete-file-name hippie-expand-try-functions-list))
 (setq hippie-expand-try-functions-list (delete 'try-complete-file-name-partially hippie-expand-try-functions-list))
@@ -148,10 +174,6 @@
  'eshell-mode-hook
  (lambda ()
    (setq pcomplete-cycle-completions nil)))
-
-; CIDER stuff
-(setq nrepl-log-messages t)
-(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
 
 ; Multilingual Text Input mode
 ;(set-input-method 'latin-1-prefix)
@@ -249,27 +271,6 @@
       (list (format "%s %%S: %%j " (system-name))
         '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
 
-;; TODO: Move this to some Clojure specific file
-(add-hook 'clojure-mode-hook
-          (lambda () (local-set-key (kbd "C-h SPC") 'cider-doc-at-point)))
-
-(defun cider-doc-at-point ()
-  "Send the symbol at point to the cider repl
-   e.g., (doc $thing-at-point). We need to
-   (use 'clojure.repl) before this will work"
-  (interactive)
-  (let* ((thing (thing-at-point 'symbol))
-         (doc-fn (concat "(doc " thing ")")))
-    (save-excursion
-      (other-window 1)
-      (end-of-buffer)
-      (insert doc-fn)
-      (cider-repl-return))))
-
-;; Enable rainbow-delimiters in all programming-related modes
-(require 'rainbow-delimiters)
-(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
-
 ;;;; TO WRITE ;;;;
 ;; Write or find these functions online, as they would probably be useful
 (defun fuzzy-find-buff (name)
@@ -321,34 +322,6 @@
 (require 'epa-file)
 (epa-file-enable)
 
-;; Load the following languages in Babel
-(org-babel-do-load-languages
-      'org-babel-load-languages
-      '((emacs-lisp . t)
-        (R . t)
-        (shell . t)
-        (python . t)
-        (ruby . t)
-        (clojure . t)
-        (latex . t)))
-
-(require 'ob-clojure)
-(setq org-src-fontify-natively t)
-(setq org-babel-clojure-backend 'cider)
-
-; In case of this message: Invalid function: org-babel-header-args-safe-fn
-; Byte recompile ob-R.el as described at: http://irreal.org/blog/?p=4295
-
-; The Cider API changed recently, so this commit needs to be applied
-; locally in emacs.d/elpa/org-$version/ob-clojure.el until it gets pushed to ELPA:
-; http://orgmode.org/w/org-mode.git?p=org-mode.git;a=commitdiff;h=4eccd7c7b564874e0e13513e06161e657832ef49
-
-; In case of this message: Invalid function: org-with-silent-modifications
-; Re-install org from ELPA *before* any org-functions have been called
-; http://tonyballantyne.com/tech/elpa-org-mode-and-invalid-function-org-with-silent-modifications/
-
-(setq org-confirm-babel-evaluate nil)
-
 (defun kill-isearch-match ()
   "Kill the current isearch match string and continue searching."
   (interactive)
@@ -356,24 +329,31 @@
 
 (define-key isearch-mode-map [(control k)] 'kill-isearch-match)
 
-(defun send-to-cider ()
-  "If region is active, send it to the other window (presumably Cider).
-   If no region is active, send the current line to the other window."
-  (interactive)
-  (let ((content (if (use-region-p)
-                      (buffer-substring (mark) (point))
-                    (thing-at-point 'sexp))))
-    (progn
-      (other-window 1)
-      (end-of-buffer)
-      (insert content))))
+(org-babel-do-load-languages
+        'org-babel-load-languages
+        '((emacs-lisp . t)
+          (R . t)
+          (shell . t)
+          (python . t)
+          (ruby . t)
+          (clojure . t)
+          (latex . t)))
 
-(global-set-key (kbd "C-c C-s") 'send-to-cider)
+;; Tangle all of our literate org-mode configuration
+(dolist (f (directory-files "~/.emacs.d/literate" t ".+\.org"))
+  (message "Tangling literate configuration file: %s..." f)
+  (let ((tangled-file (car (org-babel-tangle-file f))))
+    (message "Done tangling - %s exported to %s" f tangled-file)))
 
-;; TODO: Come up with some sort of directory structure and autoload
-;; things like this
-(load "~/.emacs.d/org-extensions.el")
+;; Load everything in custom/
+(dolist (f (directory-files "~/.emacs.d/literate" t ".+\.el"))
+  (message "Loading customizations from %s..." f)
+  (load f))
 
 ;; Load everything that's machine-specific
 (load "~/.emacs.d/user_local.el")
 
+;; Load all our patches
+(dolist (f (directory-files "~/.emacs.d/patches" t ".+\.el"))
+  (message "Loading patches from %s..." f)
+  (load f))

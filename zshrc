@@ -78,7 +78,7 @@ alias u="cd ..; ls"
 # always use mvim within the terminal
 #alias vi="mvim -v"
 #alias vim="mvim -v"
-alias emacs="open /Applications/Emacs.app"
+#alias emacs="open /Applications/Emacs.app"
 alias vlc="/Applications/VLC.app/Contents/MacOS/VLC"
 
 # jump to marks

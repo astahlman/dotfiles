@@ -1,0 +1,137 @@
+#+TITLE: org-mode.el
+#+PROPERTY: tangle org-mode-extensions.el
+
+* Description
+
+Custom extensions for org-mode.
+
+* Babel
+
+Load support for the following languages.
+
+#+BEGIN_SRC elisp
+  ;; Load the following languages in Babel
+  (org-babel-do-load-languages
+        'org-babel-load-languages
+        '((emacs-lisp . t)
+          (R . t)
+          (shell . t)
+          (python . t)
+          (ruby . t)
+          (clojure . t)
+          (latex . t)))
+#+END_SRC
+
+Fontify code in src blocks.
+
+#+BEGIN_SRC elisp
+  (setq org-src-fontify-natively t)
+#+END_SRC
+
+Yes, I really want to evaluate this source block.
+
+#+BEGIN_SRC elisp
+(setq org-confirm-babel-evaluate nil)
+#+END_SRC
+
+Use Cider to evaluate src blocks.
+
+#+BEGIN_SRC elisp
+  (require 'ob-clojure)
+  (setq org-babel-clojure-backend 'cider)
+#+END_SRC
+
+* Exporting
+
+Support export to Markdown.
+
+#+BEGIN_SRC elisp
+(add-to-list 'org-export-backends 'md)
+#+END_SRC
+
+#+BEGIN_SRC elisp
+  (defun replace-stars (i)
+    (interactive "n")
+    (query-replace (make-string i ?*) (concat ".h" (number-to-string i))))
+
+  (defun export-to-dp (i)
+    "Export an org-mode file to dp, this is a work in progress"
+    (interactive "n")
+    (mark-whole-buffer)
+    (if (= i 0)
+        nil
+      (replace-stars i)
+      (export-to-dp (- i 1))))
+
+  (defun export-to-media-wiki ()
+    nil)
+#+END_SRC
+
+* Editing
+
+** Add date property
+
+Add the current date as a property to the current heading with =C-c
+C-x t=.
+
+#+BEGIN_SRC elisp
+
+  (defun today-string ()
+    (format-time-string "%Y-%m-%d" (current-time)))
+
+  (defun mark-today ()
+    "Add today's date to this header's properties drawer"
+    (interactive)
+    (save-excursion
+      (outline-previous-visible-heading 1)
+      (message "%s" (org-today))
+      (org-entry-add-to-multivalued-property (point-at-eol) "date" (today-string))))
+    
+  (global-set-key (kbd "C-c C-x t") 'mark-today)
+
+  #+END_SRC
+
+** Make org pretty
+
+  #+BEGIN_SRC elisp
+
+    (require 'org-bullets)
+    (add-hook 'org-mode-hook (lambda () (org-bullets-mode)))
+
+    ;; org-beautify-theme is installed in /elpa, not /themes
+    ;; We have to specifically add it to the custom-theme-load-path
+    (let ((org-beautify-el (car (file-expand-wildcards "~/.emacs.d/elpa/org-beautify*"))))
+      (when
+          (and (boundp 'custom-theme-load-path) org-beautify-el)
+        (add-to-list 'custom-theme-load-path
+                     (file-name-as-directory org-beautify-el))))
+
+    (setq org-startup-indented t)
+    
+#+END_SRC
+
+* Email
+
+#+BEGIN_SRC elisp
+  (require 'org-mime)
+#+END_SRC
+
+* Common Errors
+
+** Invalid function: org-babel-header-args-safe-fn
+
+=byte-recompile-file ob-R.el= as described [[http://irreal.org/blog/?p=4295][here]].
+
+** Invalid function: org-with-silent-modifications
+
+Re-install org from ELPA *before* any org-functions have been called.
+See [[http://tonyballantyne.com/tech/elpa-org-mode-and-invalid-function-org-with-silent-modifications/][this]] blog post.
+
+* Patches
+
+** TODO ob-clojure.el
+
+The Cider API changed recently, so [[http://orgmode.org/w/org-mode.git?p=org-mode.git;a=commitdiff;h=4eccd7c7b564874e0e13513e06161e657832ef49][this commit]] needs to be applied
+locally in emacs.d/elpa/org-$version/ob-clojure.el until it gets
+pushed to ELPA. TODO: Move this to emacs.d/patches, or remove it if it
+is no longer needed.

@@ -10,6 +10,3 @@
 	default = current
 [include]
 	path = ~/dotfiles/gitconfig_local
-[user]
-	email = stahlman@amazon.com
-	name = Stahlman

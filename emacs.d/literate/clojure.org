@@ -1,0 +1,108 @@
+#+TITLE: clojure.el
+#+PROPERTY: tangle clojure.el
+
+* Description
+
+This file contains all of my Clojure specific tooling.
+
+* Editing
+
+Activate =clojure-mode= when working with =.edn= files.
+
+#+BEGIN_SRC clojure
+(add-to-list 'auto-mode-alist '("\\.edn$" . clojure-mode))
+#+END_SRC
+
+Rainbow delimiters are nice to have everywhere.
+
+#+BEGIN_SRC clojure
+  (require 'rainbow-delimiters)
+  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+#+END_SRC
+
+* Cider
+
+Turn on subword mode, paredit, and rainbow delimiters in the REPL. In
+subword mode, camel-case and underscored text is treated as containing
+multiple words.
+
+#+BEGIN_SRC clojure
+  (add-hook 'cider-repl-mode-hook 'subword-mode)
+  (add-hook 'cider-repl-mode-hook 'paredit-mode)
+  (add-hook 'cider-repl-mode-hook 'rainbow-delimiters-mode)
+#+END_SRC
+
+Make the REPL popup when it (finally) connects.
+
+#+BEGIN_SRC clojure
+(setq cider-repl-pop-to-buffer-on-connect t)
+#+END_SRC
+
+The stacktrace buffer should always pop to the front on errors.
+
+#+BEGIN_SRC clojure
+  
+  (setq cider-popup-stacktraces t)
+  (setq cider-repl-popup-stacktraces t)
+  (setq cider-auto-select-error-buffer t)
+#+END_SRC
+
+Set up Cider command history.
+
+#+BEGIN_SRC clojure
+(setq cider-repl-history-file "~/.emacs.d/cider-history")
+(setq cider-repl-wrap-history t)
+#+END_SRC
+
+Log nrepl messages so we can debug when things go wrong.
+
+#+BEGIN_SRC clojure
+(setq nrepl-log-messages t)
+#+END_SRC
+
+Show the signature of the current function in the echo area.
+
+#+BEGIN_SRC clojure
+(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
+#+END_SRC
+
+Lookup documentation for =thing-at-point= with =C-h SPC=.
+
+#+BEGIN_SRC clojure
+  (defun cider-doc-at-point ()
+    "Send the symbol at point to the cider repl
+     e.g., (doc $thing-at-point). We need to
+     (use 'clojure.repl) before this will work"
+    (interactive)
+    (let* ((thing (thing-at-point 'symbol))
+           (doc-fn (concat "(doc " thing ")")))
+      (save-excursion
+        (other-window 1)
+        (end-of-buffer)
+        (insert doc-fn)
+        (cider-repl-return))))
+
+  (add-hook 'clojure-mode-hook
+            (lambda () (local-set-key (kbd "C-h SPC")
+                                 'cider-doc-at-point)))
+#+END_SRC
+
+Send the region to the other window with =C-c C-s=, which hopefully is
+Cider. TODO: Actually look for the Cider window.
+
+#+BEGIN_SRC clojure
+  (defun send-to-cider ()
+    "If region is active, send it to the other window (presumably Cider).
+     If no region is active, send the current line to the other window."
+    (interactive)
+    (let ((content (if (use-region-p)
+                        (buffer-substring (mark) (point))
+                      (thing-at-point 'sexp))))
+      (progn
+        (other-window 1)
+        (end-of-buffer)
+        (insert content))))
+
+  (global-set-key (kbd "C-c C-s") 'send-to-cider)
+
+#+END_SRC
