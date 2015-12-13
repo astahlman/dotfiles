@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: start an example block, e.g. #+BEGIN_EXAMPLE
+# key: example
+# --
+
+#+BEGIN_EXAMPLE
+    $0
+#+END_EXAMPLE

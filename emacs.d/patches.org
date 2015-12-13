@@ -1,0 +1,85 @@
+* Overview
+
+This file contains re-definitions of functions and variables from
+third-party packages.
+
+* org-babel
+
+** Fix tmp dirs used by TRAMP for remote execution
+
+[[http://www.howardism.org/Technical/Emacs/literate-devops.html#fn.2][This post]] explains that babel expects the remote system to use the
+same directory format for temp files as on the host system, which
+breaks when remote exec'ing from OS X to RHEL5, for example. We
+redefine the function below for a temporary fix.
+
+#+BEGIN_SRC elisp :tangle patches/ob-core-patch.el
+  (defun org-babel-temp-file (prefix &optional suffix)
+    "Create a temporary file in the `org-babel-temporary-directory'.
+  Passes PREFIX and SUFFIX directly to `make-temp-file' with the
+  value of `temporary-file-directory' temporarily set to the value
+  of `org-babel-temporary-directory'."
+    (if (file-remote-p default-directory)
+        (let ((prefix
+               ;; We cannot use `temporary-file-directory' as local part
+               ;; on the remote host, because it might be another OS
+               ;; there.  So we assume "/tmp", which ought to exist on
+               ;; relevant architectures.
+               (concat (file-remote-p default-directory)
+                       ;; REPLACE temporary-file-directory with /tmp:
+                       (expand-file-name prefix "/tmp/"))))
+          (make-temp-file prefix nil suffix))
+      (let ((temporary-file-directory
+             (or (and (boundp 'org-babel-temporary-directory)
+                      (file-exists-p org-babel-temporary-directory)
+                      org-babel-temporary-directory)
+                 temporary-file-directory)))
+        (make-temp-file prefix nil suffix))))    
+#+END_SRC
+
+** Make mime htmlize-buffer work
+
+
+#+BEGIN_SRC elisp :tangle patches/org-mime-patch.el
+(defun org-mime-htmlize (&optional arg)
+  "Export to HTML an email body composed using `mml-mode'.
+If called with an active region only export that region,
+otherwise export the entire body."
+  (interactive "P")
+  (require 'ox-org)
+  (require 'ox-html)
+  (let* ((region-p (org-region-active-p))
+         (html-start (or (and region-p (region-beginning))
+                         (save-excursion
+                           (goto-char (point-min))
+                           (search-forward mail-header-separator)
+                           (+ (point) 1))))
+         (html-end (or (and region-p (region-end))
+                       ;; TODO: should catch signature...
+                       (point-max)))
+         (raw-body (concat org-mime-default-header
+			   (buffer-substring html-start html-end)))
+         (tmp-file (make-temp-name (expand-file-name
+				    "mail" temporary-file-directory)))
+         (body (org-export-string-as raw-body 'org t))
+         ;; because we probably don't want to export a huge style file
+         (org-export-htmlize-output-type 'inline-css)
+         ;; makes the replies with ">"s look nicer
+         (org-export-preserve-breaks org-mime-preserve-breaks)
+	 ;; dvipng for inline latex because MathJax doesn't work in mail
+	 (org-html-with-latex 'dvipng)
+         ;; to hold attachments for inline html images
+         (html-and-images
+          (org-mime-replace-images
+	   (org-export-string-as raw-body 'html t) tmp-file))
+         (html-images (unless arg (cdr html-and-images)))
+         (html (org-mime-apply-html-hook
+                (if arg
+                    (format org-mime-fixedwith-wrap body)
+                  (car html-and-images)))))
+    (delete-region html-start html-end)
+    (save-excursion
+      (goto-char html-start)
+      (insert (org-mime-multipart
+	       body html (mapconcat 'identity html-images "\n"))))))
+#+END_SRC
+

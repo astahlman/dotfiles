@@ -25,19 +25,18 @@
                        org
                        org-bullets
                        org-beautify-theme
+                       org-mime
                        smart-mode-line
                        htmlize
                        json-mode
                        yaml-mode
-                       ox-mediawiki))
+                       ox-mediawiki
+                       erc-terminal-notifier))
 
 ;; Activate all the packages
 (package-initialize)
 
-;; Fetch list of packages available
-(or (file-exists-p package-user-dir)
-    (package-refresh-contents))
-
+;; TODO: I don't think the auto-updating via package-install works...
 ; Install anything that's missing
 ; Take the latest version of built-in packages, e.g. org
 (dolist (package my-packages)
@@ -327,8 +326,9 @@
       'org-babel-load-languages
       '((emacs-lisp . t)
         (R . t)
-        (sh . t)
+        (shell . t)
         (python . t)
+        (ruby . t)
         (clojure . t)
         (latex . t)))
 
@@ -376,3 +376,4 @@
 
 ;; Load everything that's machine-specific
 (load "~/.emacs.d/user_local.el")
+

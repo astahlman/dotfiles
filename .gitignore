@@ -1,2 +1,10 @@
 *_local
 elpa/
+emacs.d/cider-history
+emacs.d/backups
+emacs.d/eshell
+emacs.d/auto-save-list
+emacs.d/.smex-items
+emacs.d/places
+emacs.d/tramp
+vim/.netrwhist
