@@ -13,13 +13,16 @@
         cljdoc
         clojure-mode
         clojure-test-mode
+        company
         dash
         elisp-slime-nav
+        emacs-eclim
         epl
         erc-terminal-notifier
         ess
         exec-path-from-shell
         find-file-in-project
+        flycheck
         google-translate
         helm
         helm-ag
@@ -44,6 +47,8 @@
         queue
         rainbow-delimiters
         s
+        sbt-mode
+        scala-mode2
         smart-mode-line
         smex
         solarized-theme
@@ -336,11 +341,12 @@
           (shell . t)
           (python . t)
           (ruby . t)
+          (scala . t)
           (clojure . t)
           (latex . t)))
 
 ;; Tangle all of our literate org-mode configuration
-(dolist (f (directory-files "~/.emacs.d/literate" t ".+\.org"))
+(dolist (f (directory-files "~/.emacs.d/literate" t ".+\.org$"))
   (message "Tangling literate configuration file: %s..." f)
   (let ((tangled-file (car (org-babel-tangle-file f))))
     (message "Done tangling - %s exported to %s" f tangled-file)))
@@ -351,7 +357,8 @@
   (load f))
 
 ;; Load everything that's machine-specific
-(load "~/.emacs.d/user_local.el")
+(when (file-exists-p "~/.emacs.d/user_local.el")
+  (load "~/.emacs.d/user_local.el"))
 
 ;; Load all our patches
 (dolist (f (directory-files "~/.emacs.d/patches" t ".+\.el"))

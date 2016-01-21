@@ -54,3 +54,14 @@ Thumbs.db
 # Vi #
 #####
 *.swp
+
+# Eclipse #
+###########
+.project
+.settings
+eclipse-bin/
+workbench.xmi
+
+# eclim #
+#########
+.classpath

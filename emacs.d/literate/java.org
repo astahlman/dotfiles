@@ -1,0 +1,57 @@
+#+TITLE: java.el
+#+PROPERTY: tangle java.el
+
+* Description
+
+This file sets up a development for Java development.
+
+* eclim
+
+Require eclim and turn on eclim-mode. (TODO: Should this be a Java
+mode hook?)
+
+#+BEGIN_SRC elisp
+(require 'eclim)
+(require 'eclimd)
+(global-eclim-mode)
+#+END_SRC
+
+Set the location of =eclipse= and the =eclimd= executable
+
+#+BEGIN_SRC elisp
+  (custom-set-variables
+    '(eclim-eclipse-dirs '("/Applications/Eclipse.app/Contents/Eclipse"))
+    '(eclim-executable "/Applications/Eclipse.app/Contents/Eclipse/eclim"))
+#+END_SRC
+
+** autocomplete
+
+Set up eclim as a source for autocompletion.
+
+#+BEGIN_SRC elisp
+(require 'ac-emacs-eclim-source)
+(ac-emacs-eclim-config)
+#+END_SRC
+
+** Error Messages
+
+Display error messages in the echo area when cursor is positioned on
+an error.
+
+#+BEGIN_SRC elisp
+  (setq help-at-pt-display-when-idle t)
+  (setq help-at-pt-timer-delay 0.1)
+  (help-at-pt-set-timer)
+#+END_SRC
+
+* Dependencies
+
+** TODO List classes in dependency closure
+
+Not sure what to do with this yet... Maybe I should just put it in .zshrc?
+
+#+BEGIN_EXAMPLE
+brazil-path run.lib | sed 's/:/\
+/g' | xargs -I {} find {} -name "*.jar" | xargs -I {} jar -tf {} | grep ".class" | less
+#+END_EXAMPLE
+

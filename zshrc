@@ -166,5 +166,8 @@ function alert-when-finished {
 
 alias awf="alert-when-finished"
 
+# TODO: Is this actually needed?
+# Make TRAMP play well with zsh: https://www.gnu.org/software/emacs/manual/html_node/tramp/Frequently-Asked-Questions.html
+#[ $TERM = "dumb" ] && unsetopt zle && PS1="$ "
+#
 source "$HOME/dotfiles/zshrc_local"
-

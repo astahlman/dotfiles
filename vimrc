@@ -84,3 +84,7 @@ endif
 " character, like the # is for R language) and replace the value "not_defined"
 " below:
 "colorscheme not_defined
+
+" Workaround for error in the C nailgun client
+" See https://groups.google.com/forum/#!topic/eclim-user/MbxuE1i1n3s
+let g:EclimNailgunClient='python'

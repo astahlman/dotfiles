@@ -8,5 +8,8 @@ emacs.d/auto-save-list
 emacs.d/.smex-items
 emacs.d/places
 emacs.d/tramp
-emacs.d/literate/*.el
+emacs.d/literate/**/*.el
+emacs.d/literate/stahlman@*
+emacs.d/literate/*-local.org
 vim/.netrwhist
+vim/eclim/**/*
