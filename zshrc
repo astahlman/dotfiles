@@ -1,3 +1,14 @@
+source "$HOME/dotfiles/zshrc_local"
+function exists {
+  type -f $1 >/dev/null
+  return $?
+}
+
+if exists local-pre-load-hook; then
+    #echo "Pre-hook - sourcing local zshell overrides"
+    local-pre-load-hook
+fi
+
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
@@ -169,5 +180,8 @@ alias awf="alert-when-finished"
 # TODO: Is this actually needed?
 # Make TRAMP play well with zsh: https://www.gnu.org/software/emacs/manual/html_node/tramp/Frequently-Asked-Questions.html
 #[ $TERM = "dumb" ] && unsetopt zle && PS1="$ "
-#
-source "$HOME/dotfiles/zshrc_local"
+
+if exists local-post-load-hook; then
+    #echo "Post-hook - sourcing local zshell overrides"
+    local-post-load-hook
+fi
