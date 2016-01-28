@@ -22,6 +22,10 @@ echo "Changing to the $dir directory"
 cd $dir
 echo "...done"
 
+# Pull down submodules, e.g., oh-my-zsh
+echo "Checking out git submodules..."
+git pull && git submodule init && git submodule update && git submodule status
+
 # move any existing dotfiles in homedir to dotfiles_old directory, then create symlinks 
 for file in $files; do
     if [[ -e "$HOME/.$file" ]]; then
