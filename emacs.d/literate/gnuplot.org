@@ -1,0 +1,17 @@
+#+TITLE: gnuplot.el
+
+* Setup
+
+Point to the gnuplot binary.
+
+#+BEGIN_SRC emacs-lisp
+  (setq gnuplot-program "/usr/local/bin/gnuplot")
+#+END_SRC
+
+Open files with extension .gp and .gnuplot in gnuplot-mode.
+
+#+BEGIN_SRC emacs-lisp
+  (setq auto-mode-alist
+        (append '(("\\.\\(gp\\|gnuplot\\)$" . gnuplot-mode)) auto-mode-alist))
+#+END_SRC
+

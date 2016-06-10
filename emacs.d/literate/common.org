@@ -1,0 +1,28 @@
+#+TITLE: common.org
+
+* Description
+General editing enhancements live here.
+
+* nyan-mode
+Use that stupid nyan-cat as a visual indicator of vertical position in
+buffer.
+
+#+BEGIN_SRC emacs-lisp
+  (nyan-mode 1)
+#+END_SRC
+
+* Whitespace
+
+Always highlight trailing whitespace.
+
+#+BEGIN_SRC emacs-lisp
+    (add-hook 'find-file-hook 'whitespace-mode)
+#+END_SRC
+* Auto-completion
+
+Turn on company mode in all buffers.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'company)
+  (add-hook 'after-init-hook 'global-company-mode)
+#+END_SRC

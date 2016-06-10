@@ -11,5 +11,9 @@ emacs.d/tramp
 emacs.d/literate/**/*.el
 emacs.d/literate/stahlman@*
 emacs.d/literate/*-local.org
+emacs.d/session.*
+emacs.d/recentf
+emacs.d/ido.last
 vim/.netrwhist
 vim/eclim/**/*
+emacs.d/ensime

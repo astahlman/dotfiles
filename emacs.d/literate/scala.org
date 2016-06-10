@@ -1,0 +1,28 @@
+#+TITLE: scala.el
+
+* Description
+
+This file contains all of my Scala specific tooling.
+
+* Activation
+
+Activate ensime when we're in Scala mode.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'ensime)
+  (add-hook 'scala-mode-hook 'ensime-mode)
+  ;(setq ensime-sbt-command "sbt -java-home $(brazil-path tooldirect.jdk)")
+  (setq ensime-sbt-command "/home/local/ANT/stahlman/tools/sbt/bin/sbt")
+#+END_SRC
+
+Start ensime in the context of a (hardcoded, for now) brazil
+workspace.
+
+#+BEGIN_SRC emacs-lisp
+  (setq ensime-sbt-command
+    (let* ((brazil-ws "$HOME/workplace/StahlmanSparkScripts/src/StahlmanSparkScripts")
+           (jdk-home (shell-command-to-string
+                      (concat "cd " brazil-ws "; brazil-path tooldirect.jdk 2>/dev/null | tr -d \"\\n\""))))
+      (concat "sbt -java-home " jdk-home)))
+#+END_SRC
+

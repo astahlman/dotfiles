@@ -17,15 +17,21 @@
         dash
         elisp-slime-nav
         emacs-eclim
+        ensime
         epl
         erc-terminal-notifier
         ess
+        evil
         exec-path-from-shell
         find-file-in-project
         flycheck
+        ggtags
+        gnuplot
+        gnuplot-mode
         google-translate
         helm
         helm-ag
+        helm-gtags
         highlight-indentation
         htmlize
         idle-highlight-mode
@@ -36,6 +42,7 @@
         markdown-mode
         math-symbol-lists
         muse
+        nyan-mode
         org-beautify-theme
         org-bullets
         org-mime
@@ -81,8 +88,17 @@
 
 ;; https://github.com/purcell/exec-path-from-shell
 (require 'exec-path-from-shell)
-(when (memq window-system '(mac ns))
-  (exec-path-from-shell-initialize))
+
+;; If we are on OSX, just use exec-from-shell
+;; Else, get the PATH from our .zshrc
+(if (memq window-system '(mac ns))
+    (exec-path-from-shell-initialize)
+  (let ((path (shell-command-to-string ". ~/.zshrc; echo -n $PATH")))
+    (setenv "PATH" path)
+    (setq exec-path
+          (append
+           (split-string-and-unquote path ":")
+           exec-path))))
 
 ;; env PATH
 (defun set-exec-path-from-shell-PATH ()
@@ -133,14 +149,18 @@
 ;; Save here instead of littering current directory with emacs backup files
 (setq backup-directory-alist `(("." . "~/.saves")))
 
+;; Provides some common lisp functions, including cl-remove-if-not
+;; (a.k.a., filter)
+(require 'cl-lib)
+
 ;; Load ESS for R
 ;ess-mode configuration
-(setq ess-ask-for-ess-directory nil) 
-(setq inferior-R-program-name "/usr/local/bin/R") 
-(setq ess-local-process-name "R") 
-(setq ansi-color-for-comint-mode 'filter) 
-(setq comint-scroll-to-bottom-on-input t) 
-(setq comint-scroll-to-bottom-on-output t) 
+(setq ess-ask-for-ess-directory nil)
+(setq inferior-R-program-name (car (cl-remove-if-not 'file-exists-p '("/usr/local/bin/R" "/usr/bin/R"))))
+(setq ess-local-process-name "R")
+(setq ansi-color-for-comint-mode 'filter)
+(setq comint-scroll-to-bottom-on-input t)
+(setq comint-scroll-to-bottom-on-output t)
 (setq comint-move-point-for-output t)
 (setq ess-eval-visibly-p nil)
 (require 'ess-site)
@@ -190,7 +210,6 @@
 
 (setq google-translate-translation-directions-alist
       '(("es" . "en") ("en" . "es")))
-
 
 ; Thanks, Steve: http://steve.yegge.googlepages.com/my-dot-emacs-file
 (defun rename-file-and-buffer (new-name)
@@ -338,23 +357,20 @@
         'org-babel-load-languages
         '((emacs-lisp . t)
           (R . t)
-          (shell . t)
+          ;(shell . t)
+          (sh . t)
           (python . t)
           (ruby . t)
           (scala . t)
           (clojure . t)
+          (java . t)
+          (gnuplot . t)
           (latex . t)))
 
-;; Tangle all of our literate org-mode configuration
-(dolist (f (directory-files "~/.emacs.d/literate" t ".+\.org$"))
-  (message "Tangling literate configuration file: %s..." f)
-  (let ((tangled-file (car (org-babel-tangle-file f))))
-    (message "Done tangling - %s exported to %s" f tangled-file)))
-
-;; Load everything in custom/
-(dolist (f (directory-files "~/.emacs.d/literate" t ".+\.el"))
+;; Load all of our literate configuration
+(dolist (f (directory-files "~/.emacs.d/literate" t "\\.org$"))
   (message "Loading customizations from %s..." f)
-  (load f))
+  (org-babel-load-file f))
 
 ;; Load everything that's machine-specific
 (when (file-exists-p "~/.emacs.d/user_local.el")

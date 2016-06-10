@@ -19,3 +19,4 @@
 
 (setq exec-path (append exec-path '("~/.emacs.d/elpa")))
 (load "~/.emacs.d/user.el")
+(put 'upcase-region 'disabled nil)

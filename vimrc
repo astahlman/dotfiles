@@ -88,3 +88,7 @@ endif
 " Workaround for error in the C nailgun client
 " See https://groups.google.com/forum/#!topic/eclim-user/MbxuE1i1n3s
 let g:EclimNailgunClient='python'
+
+" The default background color in Visual mode is black. This doesn't work well
+" against a black background, so make it grey instead."
+hi Visual ctermbg=Gray

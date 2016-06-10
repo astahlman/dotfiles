@@ -51,7 +51,7 @@ export PATH="/usr/local/bin:/usr/local/heroku/bin:/usr/bin:/bin:/usr/sbin:/sbin:
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
@@ -90,7 +90,6 @@ alias u="cd ..; ls"
 #alias vi="mvim -v"
 #alias vim="mvim -v"
 #alias emacs="open /Applications/Emacs.app"
-alias vlc="/Applications/VLC.app/Contents/MacOS/VLC"
 
 # jump to marks
 export MARKPATH=$HOME/.marks

@@ -65,3 +65,8 @@ workbench.xmi
 # eclim #
 #########
 .classpath
+
+# ensime #
+##########
+.ensime
+.ensime_cache
