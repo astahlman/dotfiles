@@ -25,13 +25,14 @@
         exec-path-from-shell
         find-file-in-project
         flycheck
+        function-args ; for C/C++ function argument completion
         ggtags
         gnuplot
         gnuplot-mode
         google-translate
         helm
         helm-ag
-        helm-gtags
+        helm-gtags ; helm integration with GNU global
         highlight-indentation
         htmlize
         idle-highlight-mode
@@ -43,6 +44,7 @@
         math-symbol-lists
         muse
         nyan-mode
+        org
         org-beautify-theme
         org-bullets
         org-mime
@@ -59,6 +61,7 @@
         smart-mode-line
         smex
         solarized-theme
+        sr-speedbar
         starter-kit
         starter-kit-bindings
         starter-kit-eshell
@@ -148,22 +151,6 @@
 
 ;; Save here instead of littering current directory with emacs backup files
 (setq backup-directory-alist `(("." . "~/.saves")))
-
-;; Provides some common lisp functions, including cl-remove-if-not
-;; (a.k.a., filter)
-(require 'cl-lib)
-
-;; Load ESS for R
-;ess-mode configuration
-(setq ess-ask-for-ess-directory nil)
-(setq inferior-R-program-name (car (cl-remove-if-not 'file-exists-p '("/usr/local/bin/R" "/usr/bin/R"))))
-(setq ess-local-process-name "R")
-(setq ansi-color-for-comint-mode 'filter)
-(setq comint-scroll-to-bottom-on-input t)
-(setq comint-scroll-to-bottom-on-output t)
-(setq comint-move-point-for-output t)
-(setq ess-eval-visibly-p nil)
-(require 'ess-site)
 
 (defun smart-open-line-above ()
   "Mimic vim's 'O'"
@@ -357,7 +344,6 @@
         'org-babel-load-languages
         '((emacs-lisp . t)
           (R . t)
-          ;(shell . t)
           (sh . t)
           (python . t)
           (ruby . t)
@@ -365,6 +351,7 @@
           (clojure . t)
           (java . t)
           (gnuplot . t)
+          (calc . t)
           (latex . t)))
 
 ;; Load all of our literate configuration

@@ -1,11 +1,33 @@
 #+TITLE: c.el
 
 * Description
-Make Emacs nice for developing and debugging in C/C++.
 
-* Tags
+Make Emacs nice for developing and debugging in C/C++. This
+configuration is bootstrapped from http://tuhdo.github.io/c-ide.html.
 
-Turn on helm-gtags when editing C, C++, or assembly.
+* Editing
+
+Make c++-mode the default for *.h files.
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+#+END_SRC
+
+* gtags
+
+#+BEGIN_SRC emacs-lisp
+  (require 'helm-gtags)
+  (setq
+   helm-gtags-ignore-case t
+   helm-gtags-auto-update t
+   helm-gtags-use-input-at-cursor t
+   helm-gtags-pulse-at-cursor t
+   helm-gtags-prefix-key "\C-cg"
+   helm-gtags-suggested-key-mapping t)
+#+END_SRC
+
+Turn on gtags mode if we are visiting a buffer with C, C++, or
+assembly.
 
 #+BEGIN_SRC emacs-lisp
   (add-hook 'c-mode-hook 'helm-gtags-mode)
@@ -16,14 +38,20 @@ Turn on helm-gtags when editing C, C++, or assembly.
 Set up keybindings.
 
 #+BEGIN_SRC emacs-lisp
-   (eval-after-load "helm-gtags"
-        '(progn
-           (define-key helm-gtags-mode-map (kbd "M-t") 'helm-gtags-find-tag)
-           (define-key helm-gtags-mode-map (kbd "M-r") 'helm-gtags-find-rtag)
-           (define-key helm-gtags-mode-map (kbd "M-s") 'helm-gtags-find-symbol)
-           (define-key helm-gtags-mode-map (kbd "M-g M-p") 'helm-gtags-parse-file)
-           (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
-           (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)
-           (define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)))   
+  (define-key helm-gtags-mode-map (kbd "C-c g a") 'helm-gtags-tags-in-this-function)
+  (define-key helm-gtags-mode-map (kbd "C-j") 'helm-gtags-select)
+  (define-key helm-gtags-mode-map (kbd "M-.") 'helm-gtags-dwim)
+  (define-key helm-gtags-mode-map (kbd "M-,") 'helm-gtags-pop-stack)
+  (define-key helm-gtags-mode-map (kbd "C-c <") 'helm-gtags-previous-history)
+  (define-key helm-gtags-mode-map (kbd "C-c >") 'helm-gtags-next-history)
 #+END_SRC
 
+* function-args
+
+Turn on function-args mode for argument completion by default anytime
+we visit a C/C++ buffer.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'function-args)
+  (fa-config-default)
+#+END_SRC

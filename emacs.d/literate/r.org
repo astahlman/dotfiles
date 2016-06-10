@@ -1,0 +1,33 @@
+#+TITLE: R.el
+* Description
+
+  Setup a nice development environment for R.
+
+* Initialization
+
+  #+begin_src emacs-lisp
+    (setq ess-ask-for-ess-directory nil)
+    (setq ess-local-process-name "R")
+    (setq ansi-color-for-comint-mode 'filter)
+    (setq comint-scroll-to-bottom-on-input t)
+    (setq comint-scroll-to-bottom-on-output t)
+    (setq comint-move-point-for-output t)
+    (setq ess-eval-visibly-p nil)
+    (require 'ess-site)
+  #+end_src
+
+  Provides some common lisp functions, including cl-remove-if-not
+  (a.k.a., filter)
+
+  #+begin_src emacs-lisp
+    (require 'cl-lib)
+  #+end_src
+
+  Point to the R binary.
+
+  #+begin_src emacs-lisp
+    (setq inferior-R-program-name
+          (car (cl-remove-if-not 'file-exists-p
+                                 '("/usr/local/bin/R" "/usr/bin/R"))))
+  #+end_src
+

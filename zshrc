@@ -47,9 +47,6 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
-export PATH="/usr/local/bin:/usr/local/heroku/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:/usr/local/git/bin:/usr/local/heroku/bin:/Library/Frameworks/Python.framework/Versions/3.3/bin:/opt/local/bin:/Users/astahlman/Documents/Programming/Tools/adt-bundle-mac-x86_64-20130219/sdk/platform-tools:/Users/astahlman/Documents/Programming/Tools/adt-bundle-mac-x86_64-20130219/sdk/platform-tools"
-# export MANPATH="/usr/local/man:$MANPATH"
-
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 
@@ -65,23 +62,10 @@ export LANG=en_US.UTF-8
 
 # ssh
 # export SSH_KEY_PATH="~/.ssh/dsa_id"
-export PATH=$PATH:~/Documents/Programming/Tools/adt-bundle-mac-x86_64-20130219/sdk/platform-tools
 set -o vi
 
-# Move to local
-export CLOJURESCRIPT_HOME=/Users/astahlman/Documents/Programming/Web/clojurescript
-
-# Move to local
-### Added by the Heroku Toolbelt
-export PATH="/usr/local/heroku/bin:$PATH"
-
-# Move to local
 ### For scrapy ###
-export PATH=$PATH:/usr/local/share/python
-
-# Move to local
-### For tex ###
-export PATH=$PATH:/usr/local/texlive/2014/bin/universal-darwin
+#export PATH=$PATH:/usr/local/share/python
 
 # shortcuts to common commands
 alias u="cd ..; ls"
@@ -106,13 +90,10 @@ function marks {
     \ls -l "$MARKPATH" | tail -n +2 | sed 's/  / /g' | cut -d' ' -f9- | awk -F ' -> ' '{printf "%-10s -> %s\n", $1, $2}'
 }
 
-export PATH=/usr/local/bin:$PATH
-
 bindkey "^R" history-incremental-search-backward
 
 # no idea what this does...
 bindkey -e
-
 bindkey -M isearch '^R' history-incremental-search-backward
 bindkey -M isearch '^S' history-incremental-search-forward
 

@@ -1,5 +1,4 @@
 #+TITLE: evil.el
-#+PROPERTY: tangle evil.el
 
 * Description
 
@@ -7,5 +6,5 @@ Trying to be evil again...
 
 #+BEGIN_SRC emacs-lisp
   (require 'evil)
-  (evil-mode 1)   
+  (evil-mode 1)
 #+END_SRC

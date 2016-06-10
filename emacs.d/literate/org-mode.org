@@ -6,23 +6,6 @@ Custom extensions for org-mode.
 
 * Babel
 
-Load support for the following languages.
-
-#+BEGIN_SRC emacs-lisp
-  ;; Load the following languages in Babel
-  (org-babel-do-load-languages
-        'org-babel-load-languages
-        '((emacs-lisp . t)
-          (R . t)
-          (sh . t)
-          (python . t)
-          (ruby . t)
-          (clojure . t)
-          (js . t)
-          (calc . t)
-          (latex . t)))
-#+END_SRC
-
 Fontify code in src blocks.
 
 #+BEGIN_SRC emacs-lisp
@@ -42,7 +25,7 @@ Use Cider to evaluate src blocks.
   (setq org-babel-clojure-backend 'cider)
 #+END_SRC
 
-Support exeuction of scala blocks. I've only glanced at the code, but
+Support execution of scala blocks. I've only glanced at the code, but
 it seems like it's wrapping the source in some boiler-plate that
 executes arbitrary code blocks and prints the result to the console.
 
