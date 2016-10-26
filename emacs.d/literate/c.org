@@ -55,3 +55,17 @@ we visit a C/C++ buffer.
   (require 'function-args)
   (fa-config-default)
 #+END_SRC
+
+* Styles
+
+Custom style for the OdinDaemon, which uses 4 spaces in place of tabs.
+
+#+BEGIN_SRC emacs-lisp
+  (setq c-basic-offset 4)
+  (defconst kodin-cpp-style
+    '((c-basic-offset . 4))
+    "For the OdinDaemon package")
+
+  (c-add-style "KODIN" kodin-cpp-style)
+#+END_SRC
+

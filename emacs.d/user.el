@@ -7,6 +7,7 @@
         async
         auctex
         auto-complete
+        blockdiag-mode
         buffer-move
         cider
         cl-lib
@@ -25,6 +26,8 @@
         exec-path-from-shell
         find-file-in-project
         flycheck
+        flymake-json
+        flymd
         function-args ; for C/C++ function argument completion
         ggtags
         gnuplot

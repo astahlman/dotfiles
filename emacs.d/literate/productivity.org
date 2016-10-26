@@ -1,0 +1,29 @@
+* Timer
+
+These functions set and cancel a timer, similar to the Google timer.
+When the timer elapses, the color scheme for the current frame is
+inverted and a message is printed to the minibuffer.
+
+#+BEGIN_SRC emacs-lisp
+  (defun tronbabylove-set-timer (time-spec)
+    "Start a timer. Examples of valid time-specs: '1 sec', '1 min', '1 hour', '30 sec 5 min 1 hour'"
+    (interactive "sTime: ")
+    (let* ((timeup-fn (lambda ()
+                        (invert-face 'default (selected-frame))
+                        (message "Time is up!")))
+          (timer (run-at-time time-spec nil timeup-fn)))
+      (setq tronbabylove-timer timer)))
+
+  (defun tronbabylove-clear-timer ()
+    "Restore the frame's color scheme"
+    (interactive)
+    (invert-face 'default (selected-frame)))
+
+  (defun tronbabylove-cancel-timer ()
+    "Cancel the current timer, if it is set"
+    (interactive)
+    (if tronbabylove-timer
+        (progn
+          (cancel-timer tronbabylove-timer)
+          (setq tronbabylove-timer nil))))
+#+END_SRC

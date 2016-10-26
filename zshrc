@@ -127,6 +127,16 @@ setopt aliases
 # Generate a random 32-character string
 alias make-password="openssl rand -base64 32 | head -c 32"
 
+
+# Cycle through autocompletions with Ctrl-A and Ctrl-B
+# Stolen from @zhout
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search # Up
+bindkey "^[[B" down-line-or-beginning-search # Down
+
 # Randomly sample a file
 function sample {
     if  [[ $# -eq 2 ]]; then
