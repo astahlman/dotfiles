@@ -1,7 +1,5 @@
 #+TITLE: common.org
-
-* Description
-General editing enhancements live here.
+#+DESCRIPTION: General editing enhancements live here.
 
 * nyan-mode
 Use that stupid nyan-cat as a visual indicator of vertical position in
@@ -18,6 +16,7 @@ Always highlight trailing whitespace.
 #+BEGIN_SRC emacs-lisp
     (add-hook 'find-file-hook 'whitespace-mode)
 #+END_SRC
+
 * Auto-completion
 
 Turn on company mode in all buffers.
@@ -26,3 +25,60 @@ Turn on company mode in all buffers.
   (require 'company)
   (add-hook 'after-init-hook 'global-company-mode)
 #+END_SRC
+
+* Paredit
+
+Kill an s-exp with =C-k= in evil-mode.
+
+#+BEGIN_SRC emacs-lisp
+  (evil-define-key 'insert paredit-mode-map (kbd "C-k") 'paredit-kill)
+#+END_SRC
+
+* Helm
+
+First, turn Helm on and make sure we use it to execute commands.
+
+#+BEGIN_SRC emacs-lisp
+  (helm-mode 1)
+  (global-set-key (kbd "M-x") 'helm-M-x)
+#+END_SRC
+
+** Opening files
+
+Use Helm to search for Files in Directories or Projects.
+
+*** File
+
+Use Helm completion for =find-file=.
+
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x C-f") 'helm-find-files)
+#+END_SRC
+
+*** Directory
+
+Fuzzy-search for all files in the current subtree using
+=helm-find-in-directory=. ([[http://blog.jenkster.com/2013/10/finding-files-in-emacs-helm.html][Credit]])
+
+#+BEGIN_SRC emacs-lisp
+  (defun helm-find-in-directory ()
+   "Fuzzy search in the current subtree, like Vim's Ctrl-P"
+   (interactive)
+   (helm :sources '(helm-source-findutils)
+         :buffer "*helm-findutils*"))
+
+  (global-set-key (kbd "C-x C-d") 'helm-find-in-directory)
+#+END_SRC
+
+*** Project
+
+Fuzzy-search for all files in the current git repository with
+=helm-browse-project=.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'helm-ls-git)
+  (global-set-key (kbd "C-x C-p") 'helm-browse-project)
+#+END_SRC
+
+
+

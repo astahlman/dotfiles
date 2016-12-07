@@ -1,0 +1,17 @@
+* Langtool
+
+Langtool provides grammar and spell-checking for prose.
+
+First, we tell the emacs-lisp langtool package where to find the .jar files.
+
+#+BEGIN_SRC emacs-lisp
+    (setq langtool-language-tool-jar "~/tools/languagetool/languagetool-standalone/target/LanguageTool-3.6-SNAPSHOT/LanguageTool-3.6-SNAPSHOT/languagetool-commandline.jar")
+#+END_SRC
+
+We use English as the default language.
+
+#+BEGIN_SRC emacs-lisp
+    (setq langtool-default-language "en-US")
+#+END_SRC
+
+Run langtool with =M-x langtool-check=. Clear the messages with =M-x langtool-check-done=.

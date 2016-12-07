@@ -1,0 +1,45 @@
+#+TITLE: Standard lib for emacs-lisp
+#+DESCRIPTION: All the functions that should exist but don't
+
+* compose
+
+emacs-lisp doesn't provide a default way to compose functions. I found
+[[http://nullprogram.com/blog/2010/11/15/][this blog post]] in which the author implemented this compose function.
+
+#+BEGIN_SRC emacs-lisp
+  (defun compose (&rest funs)
+    "Return function composed of FUNS."
+    (lexical-let ((lex-funs funs))
+      (lambda (&rest args)
+        (reduce 'funcall (butlast lex-funs)
+                :from-end t
+                :initial-value (apply (car (last lex-funs)) args)))))
+#+END_SRC
+
+This function uses [[https://www.emacswiki.org/emacs/DynamicBindingVsLexicalBinding][lexical binding]] to ensure that we capture the
+functions as they are defined now.
+
+* zip
+
+The =zip-seqs= function interleaves two sequences until either of the
+sequences runs out of elements.
+
+#+BEGIN_SRC emacs-lisp
+  (defun zip-seqs (x y)
+    "Zip two sequences. Example:
+
+    '(a b c) '(d e f) => '((a d) (b e) (c f))
+
+     The length of the sequence returned is the same as the shorter
+     of the two lists."
+    (if (or (eql (car x) nil) (eql (car y) nil)) nil
+      (cons
+       (list (car x) (car y))
+       (zip-seqs (rest x) (rest y)))))
+
+  (ert-deftest test-zip-seqs ()
+    (should (equal '((1 4) (2 5) (3 6)) (zip-seqs '(1 2 3) '(4 5 6))))
+    (should (equal '((1 4)) (zip-seqs '(1 2 3) '(4))))
+    (should (equal '() (zip-seqs '(1 2 3) '()))))
+#+END_SRC
+

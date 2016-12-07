@@ -1,10 +1,55 @@
 #+TITLE: evil.el
 
-* Description
+* <Leader>
 
-Trying to be evil again...
+Enable evil-leader in every buffer where evil-mode is enabled.
+
+#+BEGIN_SRC emacs-lisp
+(require 'evil-leader)
+(global-evil-leader-mode)
+#+END_SRC
+
+We do this *before* enabling evil-mode so that evil-leader will be
+available in the buffers created on startup (e.g., *scratch*,
+*Messages*).
+
+Use Spacebar as <Leader>.
+
+#+BEGIN_SRC emacs-lisp
+(evil-leader/set-leader "<SPC>")
+#+END_SRC
+
+* Turn on evil-mode
 
 #+BEGIN_SRC emacs-lisp
   (require 'evil)
   (evil-mode 1)
 #+END_SRC
+
+* Editing
+
+** Unfill paragraph
+
+Undo line-wrapping by removing line breaks.
+
+#+BEGIN_SRC emacs-lisp
+    (defun unfill-paragraph (&optional region)
+      "Takes a multiline paragraph and removes the line breaks"
+      (interactive)
+      (let ((fill-column (point-max)))
+        (fill-paragraph nil region)))
+
+    (evil-leader/set-key
+     "q" 'unfill-paragraph)
+#+END_SRC
+
+** Use 'jk' as <Esc>
+
+Uses key-chord mode to define 'jk' as a keychord bound to <Esc>.
+
+#+BEGIN_SRC emacs-lisp
+(require 'key-chord)
+(key-chord-mode 1)
+(key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
+#+END_SRC
+

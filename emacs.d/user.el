@@ -23,6 +23,7 @@
         erc-terminal-notifier
         ess
         evil
+        evil-leader
         exec-path-from-shell
         find-file-in-project
         flycheck
@@ -36,12 +37,15 @@
         helm
         helm-ag
         helm-gtags ; helm integration with GNU global
+        helm-ls-git
         highlight-indentation
         htmlize
         idle-highlight-mode
         ido-ubiquitous
         inf-ruby
         json-mode
+        key-chord
+        langtool
         latex-preview-pane
         markdown-mode
         math-symbol-lists
@@ -50,6 +54,7 @@
         org
         org-beautify-theme
         org-bullets
+        org-gcal
         org-mime
         ox-mediawiki
         paredit
@@ -271,10 +276,6 @@
 ;Temporary workaround - see https://github.com/technomancy/emacs-starter-kit/issues/99
 (remove-hook 'ruby-mode-hook 'esk-run-coding-hook)
 
-;; Turn on Helm
-(global-set-key (kbd "M-x") 'helm-M-x)
-(global-set-key (kbd "C-x C-f") 'helm-find-files)
-
 ;; Saner regexp syntax, as recommended by
 ;; http://www.masteringemacs.org/article/re-builder-interactive-regexp-builder
 (require 're-builder)
@@ -356,6 +357,11 @@
           (gnuplot . t)
           (calc . t)
           (latex . t)))
+
+;; Turn on evil before we load anything else so that we can use
+;; evil-define-key
+(require 'evil)
+(evil-mode 1)
 
 ;; Load all of our literate configuration
 (dolist (f (directory-files "~/.emacs.d/literate" t "\\.org$"))

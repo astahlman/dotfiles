@@ -1,0 +1,27 @@
+#+TITLE: octave.el
+#+PROPERTY: tangle octave.el
+
+Use octave-mode for files with a '.m' extension.
+
+#+BEGIN_SRC emacs-lisp
+  (autoload 'octave-mode "octave-mod" nil t)
+  (setq auto-mode-alist
+        (cons '("\\.m$" . octave-mode) auto-mode-alist))
+#+END_SRC
+
+When in octave-mode, turn on:
+
+1. Abbreviation expansion
+2. Auto-fill mode (automatically inserts line break once current row
+   exceeds a set number of columns)
+3. Font-lock mode (for displaying symbols).
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'octave-mode-hook
+            (lambda ()
+              (abbrev-mode 1)
+              (auto-fill-mode 1)
+              (if (eq window-system 'x)
+                  (font-lock-mode 1))))
+#+END_SRC
+

@@ -101,8 +101,261 @@ C-x t=.
                      (file-name-as-directory org-beautify-el))))
 
     (setq org-startup-indented t)
-    
+
 #+END_SRC
+
+* Searching
+Use =C-c C-j= to invoke =org-goto=. Use file-like path completion, and
+show up to 10 levels deep.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-goto-interface 'outline-path-completion
+
+        org-goto-max-level 10)
+#+END_SRC
+
+Use =C-c l= to store a link to the current location.
+
+#+BEGIN_SRC emacs-lisp
+    (global-set-key (kbd "C-c l") 'org-store-link)
+#+END_SRC
+
+* Agenda
+
+The agenda is populated from the organizer file in my home directory.
+Activate the agenda view with =C-c a=.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-agenda-file-regexp "\\`[^.].*\\.org\\'")
+  (setq org-agenda-files '("~/organizer/"))
+  (global-set-key "\C-ca" 'org-agenda)
+#+END_SRC
+
+* Quick-Note taking
+
+** Capturing
+
+Use =org-capture= to quickly capture notes and stash them in
+=~/organizer.org= for refiling later.
+
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-c c") 'org-capture)
+  (setq org-default-notes-file "~/organizer.org")
+#+END_SRC
+
+*** Custom Templates
+
+Set up our custom templates.
+
+#+BEGIN_SRC emacs-lisp
+  (defvar org-capture-templates '())
+#+END_SRC
+
+When inserting raw text into a capture template, turn off
+autocompletion with helm. Otherwise, it's too cumbersome to
+quote-insert whitespace into a string with multiple words.
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'helm-completing-read-handlers-alist '(org-capture-fill-template))
+#+END_SRC
+
+**** Spanish Vocabulary Word
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-capture-templates
+        '("v" "Vocabulario - Sustantivo" table-line (file+headline "~/prose/Wiki/Notes/Spanish/Vocab.org" "Sustantivos")
+           "|%^{spanish} | %^{english}| %t |"))
+#+END_SRC
+
+** Refiling
+
+Use =org-refile= to move a heading somewhere else. Default binding is
+=C-c C-w=. You can also use =C-u C-c C-w= to jump to a target, like
+just =org-goto=.
+
+=nil= means look for candidates in the current buffer, ~(:maxlevel . 10)~
+controls how deep in the tree we look.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-refile-targets '((nil . (:maxlevel . 10))))
+#+END_SRC
+
+Sometimes, we want to move this heading to a different file
+altogether. =org-refile-foreign= prompts for a file and then calls
+=org-refile= after temporarily overriding org-refile-targets.
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-refile-foreign (&optional target-file-name)
+    "Prompt for the name of a different file in which to org-refile"
+    (interactive)
+    (let* ((target-file (or target-file-name (helm-read-file-name "Destination: ")))
+           (org-refile-targets `(((,target-file) . (:maxlevel . 10)))))
+      (org-refile)))
+#+END_SRC
+
+#+RESULTS:
+: org-refile-foreign
+
+Sometimes we know exactly where we want to refile. For example, when
+importing captures, we always want to put them in the main organizer
+file under the Captures heading. This function takes a file and the
+name of a headline as the refile target.
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-refile-in-fixed-location (file headline)
+    "Refile under HEADLINE (must be exact match) in FILE"
+    (let ((pos (save-excursion
+                 (find-file file)
+                 (org-find-exact-headline-in-buffer headline))))
+      (org-refile nil nil (list headline file nil pos))))
+#+END_SRC
+
+** Importing captures from Gmail
+
+I've got a label in Gmail named =Capture= which catches any messages
+from myself with =[Org]= in the subject line. We use gnus to fetch
+every article in the =Capture= group, then parse the article to
+extract a title and any [tags] in the subject (not currently making
+use of the tags), the body of the capture, and the timestamp.
+
+First, we open the "Capture" group. Then we iterate through every
+unread article, select it, and extract the specification for a new
+org-mode heading as an alist.
+
+We then pass this alist to =org-email-capture-file-in-organizer=,
+which creates stashes the entry in my organizer.
+
+At the end we teardown by killing the Summary and Article buffers,
+then exit gnus. This teardown happens unconditionally, as does the
+launching of gnus on invocation. TODO: write some smarter logic to
+avoid opening and closing gnus if gnus is already open when this
+function is invoked.
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-email-capture-pull-from-gmail ()
+    "Import everything in the Capture folder from Gmail and stash
+  it in my organizer file."
+    (interactive)
+    (save-excursion
+      (gnus)
+      (gnus-group-read-group nil t "Capture")
+      (gnus-summary-limit-to-unread)
+      (if (> (count-words (point-min) (point-max)) 0) ;; >= 1 unread message
+          (gnus-summary-iterate 100
+            (gnus-summary-select-article)
+            (with-current-buffer gnus-article-buffer
+              (let* ((article-info (org-email-capture-parse-article-current-buffer)))
+                (message "[org-email-capture] Parsed capture: %s" article-info)
+                (org-email-capture-file-in-organizer article-info)))))
+      (kill-buffer gnus-article-buffer)
+      (set-buffer gnus-summary-buffer)
+      (gnus-summary-exit)
+      (gnus-group-exit)))
+#+END_SRC
+
+*** Parsing
+
+The =org-email-capture-parse-article-current-buffer= function assumes that the current
+buffer is visiting a gnus-article. It extracts an alist with the
+following keys.
+
+1. subject
+2. date
+3. content
+4. tags
+
+#+BEGIN_SRC emacs-lisp
+  (ert-deftest test-org-email-capture-parse-article ()
+    "Test that we can parse the fields from a gnus article as an Org email capture"
+    (let ((article-body "From: Andrew Stahlman <andrew.stahlman@gmail.com>
+  Subject: [Org] [task] Get 3 account recovery codes from Google
+  To: andrew.stahlman@gmail.com
+  Date: Thu, 1 Dec 2016 19:22:42 -0800 (1 day, 12 hours, 7 minutes ago)
+
+  Getting locked out in Europe would have been tough
+
+
+  "))
+      (save-excursion
+        (with-temp-buffer
+          (progn
+            (goto-char 0)
+            (insert article-body)
+            (goto-char 0))
+          (let ((article-info (org-email-capture-parse-article-current-buffer)))
+            (should (equal "Get 3 account recovery codes from Google"
+                           (cadr (assoc 'subject article-info))))
+            (should (equal '("task")
+                           (cadr (assoc 'tags article-info))))
+            (should (equal "Thu, 1 Dec 2016 19:22:42 -0800"
+                           (cadr (assoc 'date article-info))))
+            (should (equal "Getting locked out in Europe would have been tough"
+                           (cadr (assoc 'content article-info)))))))))
+
+    (defun org-email-capture-parse-article-current-buffer ()
+      "Read the content of the gnus article in the current buffer
+  and return an alist with the date and contents. The alist looks
+  like this:
+
+  '((date DATE-STR)
+    (subject SUBJECT)
+    (tags TAGS-LIST)
+    (content CONTENT))"
+      (interactive)
+      (let (date-string subject content)
+        (let* ((subject-and-tags (org-email-capture-parse-tags-and-subject))
+               (date-re "Date: \\(\\w\\{3\\}, [0-9]\\{1,2\\} \\w\\{3\\} [0-9]\\{4\\} [0-9]\\{1,2\\}:[0-9]\\{2\\}:[0-9]\\{2\\} [+-][0-9]\\{4\\}\\)"))
+          (save-excursion
+            (beginning-of-buffer)
+            (search-forward-regexp date-re)
+            (setq date-string (match-string-no-properties 1))
+            (next-line)
+            (beginning-of-line)
+            (setq content (s-trim
+                           (buffer-substring-no-properties (point) (point-max))))
+            `((date ,date-string)
+              (subject ,(cdr (assq 'subject subject-and-tags)))
+              (tags ,(cdr (assq 'tags subject-and-tags)))
+              (content ,content))))))
+
+  (defun org-email-capture-parse-tags-and-subject ()
+    (interactive)
+    (search-forward "Subject:")
+    (let (subject (all-tags nil))
+      (while (re-search-forward "\\[\\([^]]+\\)\\]" nil t)
+        (push (match-string-no-properties 1) all-tags))
+      (setq tags (filter (lambda (tag) (not (string-match "org" tag))) all-tags))
+      (setq subject (s-trim (buffer-substring-no-properties (point) (line-end-position))))
+      `((tags . ,tags)
+        (subject . ,subject))))
+#+END_SRC
+
+#+RESULTS:
+: org-email-capture-parse-tags-and-subject
+
+*** Filing
+
+#+BEGIN_SRC emacs-lisp
+  (defconst org-email-capture-target-file "~/organizer/main.org")
+
+  (defun org-email-capture-file-in-organizer (capture-info)
+    "Take the capture-info and put it in main.org"
+    (interactive)
+    (with-temp-buffer
+      (progn
+        (org-mode)
+        (org-insert-heading)
+        (insert (cadr (assoc 'subject capture-info)))
+        (org-return-indent)
+        (when (assoc 'content capture-info)
+          (insert (cadr (assoc 'content capture-info))))
+        (org-set-property "capture-date" (cadr (assoc 'date capture-info)))
+        (org-back-to-heading)
+        (org-refile-in-fixed-location org-email-capture-target-file "Captures"))))
+#+END_SRC
+
+#+RESULTS:
+: org-email-capture-file-in-organizer
 
 * Email
 

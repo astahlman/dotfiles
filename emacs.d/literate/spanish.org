@@ -1,0 +1,418 @@
+#+TITLE: Spanish.org
+
+* Transforming corrections
+
+#+BEGIN_CORRECTION
+This +are+ *is* a sample correction.
+#+END_CORRECTION
+
+#+BEGIN_CORRECTION
+This +are+ *is* a sample correction.
+#+END_CORRECTION
+
+To transform raw correction markup to corrected text, we apply the
+following rules:
+
+1. Remove +strikethrough+ text.
+2. Normalize text in *bold*.
+3. Leave everything else untouched, but normalize spacing.
+
+#+BEGIN_SRC emacs-lisp
+  (defun tbl-format-correction-markup (&optional string start end)
+    "Takes a multiline paragraph and removes the line breaks"
+    (interactive)
+    (let* ((input-str (or string (buffer-substring-no-properties (region-beginning) (region-end))))
+           (remove-strikethrough (lambda (s) (replace-regexp-in-string "\\+[^\\+]*\\+" "" s)))
+           (unbolden (lambda (s) (replace-regexp-in-string "\\*" "" s)))
+           (dedupe-whitespace (lambda (s) (replace-regexp-in-string " +" " " s)))
+           (trim (lambda (s) (replace-regexp-in-string " +$" ""
+                                                  (replace-regexp-in-string "^ +" "" s))))
+           (composed-transforms (compose trim
+                                         dedupe-whitespace
+                                         unbolden
+                                         remove-strikethrough))
+           (output-str (funcall composed-transforms input-str)))
+      (progn (message "%s -> %s" input-str output-str)
+             output-str)))
+
+  (ert-deftest test-format-correction-markup ()
+      "Tests string transformation logic for correction markup"
+      (should (equal "This is correct."
+                     (tbl-format-correction-markup "+These+ *This* is +lollipop+ *correct*.")))
+      (should (equal "" (tbl-format-correction-markup " +This is nothing+   ")))
+      (should (equal "Just a passthrough." (tbl-format-correction-markup "Just a passthrough."))))
+#+END_SRC
+
+* Correction Blocks
+
+First, we need to find all of the correction blocks. Correction blocks
+look like babel src blocks, except that they use "CORRECTION" instead
+of "SRC." I have some doubts about this approach - maybe I should have
+just written a new interpreter for org-babel and reused the existing
+SRC block infrastructure. Time will tell I suppose.
+
+#+BEGIN_SRC emacs-lisp
+  (defun find-correction-blocks ()
+    "Find the positions of the correction blocks in the current buffer"
+    (interactive)
+    (let* ((block-open (mapcar 'car ;(lambda (m) (car m))
+                               (re-matches-in-buffer "#\\+begin_correction")))
+           (block-close (mapcar (lambda (m) (+ (car m) (length "#+end_correction")))
+                                (re-matches-in-buffer "#\\+end_correction")))
+           (block-bounds (and (= (length block-open) (length block-close))
+                              (zip-seqs block-open block-close))))
+      (message "block-bounds: %s" block-bounds)
+      (if (and block-bounds
+               (monotonically-inc-p (-flatten block-bounds)))
+          block-bounds
+        (error "Mismatched correction blocks!"))))
+
+    (ert-deftest test-find-valid-correction-blocks ()
+      "Test that we can identify properly-paired correction_blocks"
+      (save-excursion
+        (with-temp-buffer
+          (progn
+            (goto-char 0)
+            (insert "#+begin_correction #+end_correction\n#+begin_correction some text #+end_correction"))
+          (message "Current buffer contents: %s" (buffer-string))
+          (should (equal '((1 36) (37 82)) (find-correction-blocks))))))
+#+END_SRC
+
+#+RESULTS:
+: test-find-valid-correction-blocks
+
+If a correction block is unclosed, we fail loudly.
+
+#+BEGIN_SRC emacs-lisp
+  (ert-deftest test-find-unclosed-correction-blocks ()
+    "Test that we barf on unclosed correction_blocks"
+    (save-excursion
+      (with-temp-buffer
+        (progn
+          (goto-char 0)
+          (insert "#+begin_correction #+begin_correction"))
+        (message "Current buffer contents: %s" (buffer-string))
+        (should-error (find-correction-blocks)))))
+#+END_SRC
+
+Similarly, if a correction block is unopened we fail loudly.
+
+#+BEGIN_SRC emacs-lisp
+  (ert-deftest test-find-unopened-correction-blocks ()
+    "Test that we barf on unopened correction_blocks"
+    (save-excursion
+      (with-temp-buffer
+        (progn
+          (goto-char 0)
+          (insert "#+begin_correction #+end_correction #+end_correction"))
+        (message "Current buffer contents: %s" (buffer-string))
+        (should-error (find-correction-blocks)))))
+#+END_SRC
+
+** Helper functions
+
+To find the correction blocks, we search the buffer for all matches
+using a regexp for the block tag. This function returns a list of
+lists, where each list contains the start and end points of a match.
+
+#+BEGIN_SRC emacs-lisp
+  (defun re-matches-in-buffer (regexp)
+    "Get a list of all regexp matches in a string"
+    (save-match-data
+      (save-excursion
+        (goto-char 1)
+        (let ((case-fold-search t)
+              (matches))
+          (while (search-forward-regexp regexp nil t 1)
+            (push (list (match-beginning 0) (match-end 0)) matches))
+          (reverse matches)))))
+#+END_SRC
+
+We also need to check whether the start and end tags are in the right
+order. For this, we zip the sequence and ensure that the positions of
+the tags form a monotonically increasing sequence.
+
+#+BEGIN_SRC emacs-lisp
+  (defun monotonically-inc-p (xs &optional prev)
+    (cond
+     ((eql nil xs) t)
+     ((eql nil prev) (monotonically-inc-p (rest xs) (car xs)))
+     ((>= prev (car xs)) nil)
+     (t (monotonically-inc-p (rest xs) (car xs)))))
+
+  (ert-deftest test-monotonically-inc-p ()
+    "monotonically-inc-p returns t if the numbers in the list are
+     monotonically increasing"
+    (should (equal nil (monotonically-inc-p '(3 2 1))))
+    (should (equal nil (monotonically-inc-p '(1 2 3 3))))
+    (should (equal nil (monotonically-inc-p '(1 2 3 -10))))
+    (should (equal t (monotonically-inc-p '())))
+    (should (equal t (monotonically-inc-p '(1 2 3 4)))))
+#+END_SRC
+
+* Manipulating overlays
+** Invocation
+
+The space bar toggles a correction block between displaying the raw
+correction markup and the corrected text. The corrected text is
+displayed via the overlay's =before-string= property.
+
+#+BEGIN_SRC emacs-lisp
+  (evil-leader/set-key-for-mode 'org-mode "t" 'toggle-correction-block-overlay-at-point!)
+#+END_SRC
+
+** Toggling
+
+A correction block is always in one of 2 states: raw or pretty. In the
+raw state, the content of the block is displayed exactly as-is. In the
+pretty state, the correction markup is parsed and only the corrected
+version of the text is displayed.
+
+*** Raw -> Pretty
+
+Every block starts out in raw mode. When it is toggled, we must first
+calculate the contents of the pretty version of the block.
+
+Note that we re-include the block header when calculating the pretty
+content. This is because we position the overlay over top of the
+heading, so the header disappears when we toggle the overlay's
+visiblity.
+
+Similarly, we strip the block header when calculating the overlay's
+contents.
+
+#+BEGIN_SRC emacs-lisp
+  (defun calculate-pretty-block-content (ov)
+    (concat "#+BEGIN_CORRECTION\n" (tbl-format-correction-markup (overlay-get-content ov))))
+
+  (defun overlay-get-content (ov)
+    (buffer-substring-no-properties
+     (+ (length "#+BEGIN_CORRECTION\n") (overlay-start ov))
+     (overlay-end ov)))
+#+END_SRC
+
+Once we've calculated the prettified content of the block, we need to
+create an overlay for the block. First, we must find the boundaries of
+the block.
+
+Note that this implementation is inefficient - we could
+just search backwards for the first occurence of =#+BEGIN_CORRECTION=
+and forwards for the next occurence of =#+END_CORRECTION=.
+
+#+BEGIN_SRC emacs-lisp
+    (defun correction-block-bounds-at-point ()
+      "Return a dotted pair of the start and end of the correction block at point"
+      (interactive)
+      (let* ((blocks (find-correction-blocks))
+             (blocks-at-point
+              (filter (lambda (block)
+                        (and (>= (cadr block) (point))
+                             (<= (car block) (point))))
+                      blocks)))
+        (cond
+         ((= 1 (length blocks-at-point))
+          (car blocks-at-point))
+         ((> (length blocks-at-point) 1)
+          (error "Found more than one correction block at point. Bounds: %s" blocks-at-point)))))
+#+END_SRC emacs-lisp
+
+Once we've find the boundaries of the block, we can create the
+overlay. We use the =before-string= property of the overlay to display
+the prettified content.
+
+#+BEGIN_SRC emacs-lisp
+    (defun build-correction-block-overlay! (block-bounds)
+      "Create an overlay with the given content"
+      (let* ((start (car block-bounds))
+             (end (cadr block-bounds))
+             (ov (make-overlay start end))
+             (content (calculate-pretty-block-content ov)))
+        (overlay-put ov 'invisible t)
+        (overlay-put ov 'before-string content)))
+#+END_SRC
+
+*** Pretty -> Raw
+
+To go from pretty to raw, we simply need to delete the overlay at
+point. There should exist both a correction block and an overlay at
+point. If not, we've reached a weird state and complain loudly.
+
+#+BEGIN_SRC emacs-lisp
+  (defun remove-correction-block-overlay! (ov)
+    "Remove the overlay"
+    (delete-overlay ov))
+#+END_SRC
+
+*** Choosing transition path
+
+When a user attempts to toggle a correction block, there are three
+possible states:
+
+1. point is not inside a correction block, so we warn and do nothing.
+2. point is inside a raw correction block, so we transition raw ->
+   pretty
+3. point is inside a pretty correction block, so we transition pretty -> raw
+
+Note that if point is inside only one of a correction block or
+overlay, we have reached a bad state, either due to  external
+manipulation of overlays or because of a bug in our logic.
+
+#+BEGIN_SRC emacs-lisp
+  (defun toggle-correction-block-overlay-at-point! ()
+    "Remove the overlay at point"
+    (interactive)
+    (let ((block-bounds (correction-block-bounds-at-point))
+          (ov (overlay-at-point)))
+      (cond
+       ((and block-bounds ov)
+        (remove-correction-block-overlay! ov))
+       ((and (not ov) block-bounds)
+        (build-correction-block-overlay! block-bounds))
+       ((and ov (not block-bounds))
+        (error "Bug in correction block logic! Somehow we got to a state where an overlay existed without a corresponding block"))
+       (t
+        (warn "No correction block at point")))))
+#+END_SRC
+
+We look for any overlays that touch point. In other words, the start
+and end of the overlay are inclusive, since our correction block spans
+from the first character of the block header to the last character of
+the block closing tag.
+
+#+BEGIN_SRC emacs-lisp
+  (defun overlay-at-point ()
+    "Return at overlays which touch point, with inclusive start and end"
+    (interactive)
+    (let ((overlays
+           (filter (lambda (ov) (and (>= (overlay-start ov) 1)
+                           (<= (overlay-end ov) 76)))
+                   (-flatten (overlay-lists)))))
+      (car overlays)))
+#+END_SRC
+
+**** Open Questions
+
+How do we prevent (or detect) changes to correction blocks or overlays
+that result in an invalid state? Do we need some kind of hash based on
+the contents? How would this help?
+
+Do overlays move with the content? (e.g., if I insert a line-break
+before a correction block)
+
+* Editing
+
+** Removing words
+
+Strikethrough the text with =<Leader>cd=. (Surrounds region with ++)
+
+#+BEGIN_SRC emacs-lisp
+  (defun correction-del-region ()
+    (interactive)
+      (kill-region (point) (mark))
+      (insert "+")
+      (yank)
+      (insert "+"))
+
+  (evil-leader/set-key
+   "cd" 'correction-del-region)
+#+END_SRC
+
+** Adding words
+
+See the =star= template in =yasnippets/org-mode=. Expand with *.
+
+** Replacing words
+
+#+BEGIN_SRC emacs-lisp
+  (defun correction-replace-region ()
+    "Remove text and open a template to add its replacement"
+    (interactive)
+    (correction-del-region)
+    (deactivate-mark)
+    (evil-insert-state)
+    (insert " ")
+    (yas-expand-snippet (yas-lookup-snippet "star")))
+
+  (evil-leader/set-key
+   "cr" 'correction-replace-region)
+#+END_SRC
+* Capture Templates
+** Vocabulary
+
+According to the [[http://orgmode.org/manual/Template-elements.html][org-manual]], this two-entry element element must
+directly precede templates with a common prefix.
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-capture-templates
+        '("v" "Vocabulario en español"))
+#+END_SRC
+
+** Sustantivo
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-capture-templates
+        '("vs" "Vocabulario - Sustantivo" table-line (file+headline "~/prose/Wiki/Notes/Spanish/Vocab.org" "Sustantivos")
+           "|%^{spanish} | %^{english}| %t |"))
+#+END_SRC
+
+** Frase
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-capture-templates
+        '("vf" "Vocabulario - Frase" table-line (file+headline "~/prose/Wiki/Notes/Spanish/Vocab.org" "Frases")
+           "|%^{spanish} | %^{english}| %t |"))
+#+END_SRC
+** Verbo
+
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-capture-templates
+        '("vv" "Vocabulario - Verbo" table-line (file+headline "~/prose/Wiki/Notes/Spanish/Vocab.org" "Verbos")
+           "|%^{spanish} | %^{english}| %t |"))
+#+END_SRC
+
+* TODO Wishlist
+
+** Fill-in-the-blanks based on past corrections
+
+FITB for words/phrases that I missed the first time.
+
+** Spaced repetition for vocab words
+
+** Parse Table from WordReference.com
+
+Ideal workflow: M-x conjugate "verb" -> Temporary buffer with org-mode table
+
+Maybe using eww?
+
+* For GC
+#+BEGIN_SRC emacs-lisp
+  (defun hide-region-unhide ()
+    "Unhide a region at a time, starting with the last one hidden and
+  deleting the overlay from the hide-region-overlays \"ring\"."
+    (interactive)
+    (make-variable-buffer-local 'hide-region-overlays)
+    (if (car hide-region-overlays)
+        (progn
+          (delete-overlay (car hide-region-overlays))
+          (setq hide-region-overlays (cdr hide-region-overlays)))))
+
+  (defun overlay-at-point ()
+    "Returns a list of overlays which touch point"
+    (interactive)
+    (car (overlays-at (point))))
+
+  (defun print-overlays ()
+    (interactive)
+    (message "%s" (overlay-lists)))
+
+  (defun unhide-region-at-point ()
+    (interactive)
+    (make-variable-buffer-local 'hide-region-overlays)
+    (let (ol-at-point (overlay-at-point))
+      (progn
+        (message "%s" ol-at-point)
+        (setq hide-region-overlays
+              (delete-overlay ol-at-point)
+              (cl-remove ol-at-point hide-region-overlays)))))
+#+END_SRC
+
