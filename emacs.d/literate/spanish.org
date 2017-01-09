@@ -102,11 +102,11 @@ Similarly, if a correction block is unopened we fail loudly.
     "Test that we barf on unopened correction_blocks"
     (save-excursion
       (with-temp-buffer
-        (progn
+	(progn
           (goto-char 0)
           (insert "#+begin_correction #+end_correction #+end_correction"))
-        (message "Current buffer contents: %s" (buffer-string))
-        (should-error (find-correction-blocks)))))
+	(message "Current buffer contents: %s" (buffer-string))
+	(should-error (find-correction-blocks)))))
 #+END_SRC
 
 ** Helper functions
@@ -214,7 +214,7 @@ and forwards for the next occurence of =#+END_CORRECTION=.
           (car blocks-at-point))
          ((> (length blocks-at-point) 1)
           (error "Found more than one correction block at point. Bounds: %s" blocks-at-point)))))
-#+END_SRC emacs-lisp
+#+END_SRC
 
 Once we've find the boundaries of the block, we can create the
 overlay. We use the =before-string= property of the overlay to display

@@ -1,5 +1,4 @@
 #+TITLE: java.el
-#+PROPERTY: tangle java.el
 
 * Description
 
@@ -10,15 +9,16 @@ This file sets up a development for Java development.
 Require eclim and turn on eclim-mode. (TODO: Should this be a Java
 mode hook?)
 
-#+BEGIN_SRC elisp
-(require 'eclim)
-(require 'eclimd)
-(global-eclim-mode)
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'java-mode-hook (lambda ()
+                              (require 'eclim)
+                              (require 'eclimd)
+                              (global-eclim-mode)))
 #+END_SRC
 
 Set the location of =eclipse= and the =eclimd= executable
 
-#+BEGIN_SRC elisp
+#+BEGIN_SRC emacs-lisp
   (custom-set-variables
     '(eclim-eclipse-dirs '("/Applications/Eclipse.app/Contents/Eclipse"))
     '(eclim-executable "/Applications/Eclipse.app/Contents/Eclipse/eclim"))
@@ -28,9 +28,10 @@ Set the location of =eclipse= and the =eclimd= executable
 
 Set up eclim as a source for autocompletion.
 
-#+BEGIN_SRC elisp
-(require 'ac-emacs-eclim-source)
-(ac-emacs-eclim-config)
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'java-mode-hook (lambda ()
+                              (require 'ac-emacs-eclim-source)
+                              (ac-emacs-eclim-config)))
 #+END_SRC
 
 ** Error Messages
@@ -38,7 +39,7 @@ Set up eclim as a source for autocompletion.
 Display error messages in the echo area when cursor is positioned on
 an error.
 
-#+BEGIN_SRC elisp
+#+BEGIN_SRC emacs-lisp
   (setq help-at-pt-display-when-idle t)
   (setq help-at-pt-timer-delay 0.1)
   (help-at-pt-set-timer)

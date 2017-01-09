@@ -17,7 +17,7 @@
         company
         dash
         elisp-slime-nav
-        emacs-eclim
+        ;emacs-eclim
         ensime
         epl
         erc-terminal-notifier
@@ -29,6 +29,7 @@
         flycheck
         flymake-json
         flymd
+	format-sql
         function-args ; for C/C++ function argument completion
         ggtags
         gnuplot
@@ -39,10 +40,11 @@
         helm-gtags ; helm integration with GNU global
         helm-ls-git
         highlight-indentation
-        htmlize
+        ;htmlize
         idle-highlight-mode
         ido-ubiquitous
         inf-ruby
+	jedi
         json-mode
         key-chord
         langtool
@@ -51,7 +53,8 @@
         math-symbol-lists
         muse
         nyan-mode
-        org
+        ;org
+	org-plus-contrib
         org-beautify-theme
         org-bullets
         org-gcal
@@ -61,19 +64,20 @@
         pkg-info
         popup
         projectile
+	pyvenv
         queue
         rainbow-delimiters
         s
         sbt-mode
-        scala-mode2
+        ;scala-mode2
         smart-mode-line
         smex
         solarized-theme
         sr-speedbar
-        starter-kit
-        starter-kit-bindings
-        starter-kit-eshell
-        starter-kit-lisp
+        ;starter-kit
+        ;starter-kit-bindings
+        ;starter-kit-eshell
+        ;starter-kit-lisp
         w3m
         yaml-mode
         yasnippet))
@@ -348,7 +352,7 @@
         'org-babel-load-languages
         '((emacs-lisp . t)
           (R . t)
-          (sh . t)
+          (shell . t)
           (python . t)
           (ruby . t)
           (scala . t)
@@ -356,6 +360,7 @@
           (java . t)
           (gnuplot . t)
           (calc . t)
+	  (sql . t)
           (latex . t)))
 
 ;; Turn on evil before we load anything else so that we can use

@@ -1,5 +1,4 @@
 #+TITLE: python.el
-#+PROPERTY: tangle python.el
 
 * Description
 Sets up a Python development environment.
@@ -8,10 +7,23 @@ Sets up a Python development environment.
 
 Turn on flycheck in the Python major mode.
 
-#+BEGIN_SRC elisp
+#+BEGIN_SRC emacs-lisp
   (require 'flycheck)
   (add-hook 'python-mode-hook #'flycheck-mode)
 #+END_SRC
 
+* Jedi
+
+Install the jedi server (just once).
+
+#+BEGIN_SRC emacs-lisp :cache yes :results none
+(jedi:install-server)
+#+END_SRC
+
+Connect to the server anytime we are in Python mode.
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'python-mode-hook 'jedi:setup)
+#+END_SRC
 
 

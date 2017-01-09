@@ -30,9 +30,55 @@ it seems like it's wrapping the source in some boiler-plate that
 executes arbitrary code blocks and prints the result to the console.
 
 #+BEGIN_SRC emacs-lisp
-(require 'scala-mode2)
+(require 'scala-mode)
 (require 'sbt-mode)
 (require 'ob-scala)
+#+END_SRC
+
+** Instrumenting src block execution
+
+Keep a buffer-local ring to track the execution times for the 50 most
+recent executions of org src blocks.
+
+#+BEGIN_SRC emacs-lisp
+  (defvar org-babel-src-block-execution-durations (make-ring 50)
+    "A ring that stores the execution durations of the 50 most
+    recent src block executions. Each object is a time object in
+    the form returned by current-time")
+  (make-variable-buffer-local 'org-babel-src-block-execution-durations)
+#+END_SRC
+
+Add advice around =org-babel-execute-src-block= to instrument the
+execution time. We echo the execution time to the minibuffer and push
+the duration onto the ring. Each object in the ring is an object of
+the same form returned by =(current-time)=.
+
+#+BEGIN_SRC emacs-lisp
+  (defun record-timing-info (orig-fn &optional arg info params)
+    "Records the execution duration of an org-babel src block org-babel-execute-src-block-duration"
+    (let ((start-time (current-time)))
+      (funcall orig-fn arg info params)
+      (let* ((delta (time-subtract (current-time)
+				   start-time))
+	     (seconds (cadr delta))
+	     (micros (nth 2 delta))
+	     (millis (/ micros 1000)))
+	(ring-insert org-babel-src-block-execution-durations delta)
+	(message "Elapsed: %s.%s seconds" seconds millis))))
+
+  (advice-add 'org-babel-execute-src-block :around #'record-timing-info)
+#+END_SRC
+
+** Library of Babel
+
+Add named blocks in these files to the Library of Babel (=lob=) so
+that they can be used from any src block.
+
+#+BEGIN_SRC emacs-lisp
+  (dolist (lob-file '("lob_local.org"))
+    (if (file-exists-p lob-file)
+	(org-babel-lob-ingest lob-file)
+      (warn "'%s' does not exist and will not be added to the Library of Babel" lob-file)))
 #+END_SRC
 
 * Exporting
@@ -104,6 +150,14 @@ C-x t=.
 
 #+END_SRC
 
+** Line-wrapping
+
+Turn on auto-fill mode, which automatically inserts a line break after 80 characters.
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'org-mode-hook 'turn-on-auto-fill)
+#+END_SRC
+
 * Searching
 Use =C-c C-j= to invoke =org-goto=. Use file-like path completion, and
 show up to 10 levels deep.
@@ -166,6 +220,24 @@ quote-insert whitespace into a string with multiple words.
         '("v" "Vocabulario - Sustantivo" table-line (file+headline "~/prose/Wiki/Notes/Spanish/Vocab.org" "Sustantivos")
            "|%^{spanish} | %^{english}| %t |"))
 #+END_SRC
+
+**** Meeting
+
+
+#+BEGIN_SRC emacs-lisp
+    (add-to-list 'org-capture-templates
+	  '("m" "Meeting" entry (file+headline "~/organizer/devlog.org" "Meetings")
+             "** %^{Title}
+    :PROPERTIES:
+    :date:	%t
+    :END:
+    %?" :jump-to-captured :immediate-finish))
+#+END_SRC
+
+#+RESULTS:
+| m | Meeting | entry | (file+headline ~/organizer/devlog.org Meetings) | ** %^{Title} |
+
+
 
 ** Refiling
 
@@ -382,6 +454,38 @@ Where should these go?
 
 Re-install org from ELPA *before* any org-functions have been called.
 See [[http://tonyballantyne.com/tech/elpa-org-mode-and-invalid-function-org-with-silent-modifications/][this]] blog post.
+
+* Flashcards
+
+Experimenting with [[http://orgmode.org/worg/org-contrib/org-drill.html][org-drill]] for spaced repetition training.
+
+#+BEGIN_SRC emacs-lisp
+(require 'org-drill)
+#+END_SRC
+
+** Example - Spanish Phrases
+
+Any entry marked with the :drill: tag is available for review. The
+entry is only picked up if it has content. The subheading is initially
+hidden, and it too cannot be empty.
+
+*** Spanish - Verb                                                  :drill:
+SCHEDULED: <2016-12-15 Thu>
+:PROPERTIES:
+:ID:       1310A6D4-8B0C-4BC3-9572-8E1FEBE5E658
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [2016-12-11 Sun 13:05]
+:END:
+compartir
+
+**** English
+to share
 
 * Patches
 

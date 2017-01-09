@@ -14,7 +14,8 @@ buffer.
 Always highlight trailing whitespace.
 
 #+BEGIN_SRC emacs-lisp
-    (add-hook 'find-file-hook 'whitespace-mode)
+  (global-whitespace-mode)
+  (setq whitespace-style '(face trailing))
 #+END_SRC
 
 * Auto-completion
@@ -41,6 +42,13 @@ First, turn Helm on and make sure we use it to execute commands.
 #+BEGIN_SRC emacs-lisp
   (helm-mode 1)
   (global-set-key (kbd "M-x") 'helm-M-x)
+#+END_SRC
+
+Make sure we can use =C-w= to delete backwards in Helm.
+
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load 'helm
+    (define-key helm-map (kbd "C-w") 'evil-delete-backward-word))
 #+END_SRC
 
 ** Opening files
@@ -79,6 +87,12 @@ Fuzzy-search for all files in the current git repository with
   (require 'helm-ls-git)
   (global-set-key (kbd "C-x C-p") 'helm-browse-project)
 #+END_SRC
+* YAML
 
+Use yaml-mode when editing =.sls= (Salt stack config) and =.yaml=
+files.
 
-
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-mode))
+  (add-to-list 'auto-mode-alist '("\\.sls\\'" . yaml-mode))
+#+END_SRC

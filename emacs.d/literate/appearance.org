@@ -1,0 +1,12 @@
+#+TITLE: Appearance
+
+* Frame
+
+Get rid of all of the cruft around the frame.
+
+#+BEGIN_SRC emacs-lisp
+  (menu-bar-mode -1)
+  (toggle-scroll-bar -1)
+  (tool-bar-mode -1)
+#+END_SRC
+

@@ -175,3 +175,7 @@ if exists local-post-load-hook; then
     #echo "Post-hook - sourcing local zshell overrides"
     local-post-load-hook
 fi
+source '/Users/andrewstahlman/src/blessclient/lyftprofile' # bless ssh alias
+
+# Don't store commands prefixed with SPACE in history
+setopt HIST_IGNORE_SPACE

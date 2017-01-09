@@ -1,6 +1,14 @@
 #+TITLE: Standard lib for emacs-lisp
 #+DESCRIPTION: All the functions that should exist but don't
 
+* paredit
+
+If we are editing emacs-lisp, use paredit.
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'emacs-lisp-mode-hook #'enable-paredit-mode)
+#+END_SRC
+
 * compose
 
 emacs-lisp doesn't provide a default way to compose functions. I found
@@ -42,4 +50,3 @@ sequences runs out of elements.
     (should (equal '((1 4)) (zip-seqs '(1 2 3) '(4))))
     (should (equal '() (zip-seqs '(1 2 3) '()))))
 #+END_SRC
-
