@@ -78,6 +78,7 @@
         ;starter-kit-bindings
         ;starter-kit-eshell
         ;starter-kit-lisp
+        writegood-mode
         w3m
         yaml-mode
         yasnippet))

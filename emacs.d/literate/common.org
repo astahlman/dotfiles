@@ -96,3 +96,96 @@ files.
   (add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-mode))
   (add-to-list 'auto-mode-alist '("\\.sls\\'" . yaml-mode))
 #+END_SRC
+
+* Package Repositories
+
+This is a fix for errors like: "Fatal error: the TLS connection was
+non-properly terminated" when trying to download packages from
+marmalade and MELPA over SSL. See [[https://github.com/nicferrier/elmarmalade/issues/55#issuecomment-166271364][this comment]] for a full explanation.
+
+The gnutls certificate store doesn't trust the CA for =marmalade.org=
+or =melpa.org=. We can force it to trust the CA using the gnutls-cli
+with the trust on first use flag to add the host to the list in
+=.gnutls/known_hosts=.
+
+#+BEGIN_SRC sh :results output
+    gnutls-cli --tofu melpa.org
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Processed 173 CA certificate(s).
+Resolving 'melpa.org'...
+Connecting to '104.236.16.183:443'...
+- Certificate type: X.509
+- Got a certificate list of 2 certificates.
+- Certificate[0] info:
+ - subject `CN=melpa.org', issuer `C=US,O=Let's Encrypt,CN=Let's Encrypt Authority X3', RSA key 2048 bits, signed using RSA-SHA256, activated `2016-11-07 09:30:00 UTC', expires `2017-02-05 09:30:00 UTC', SHA-1 fingerprint `34caf2f55155e285e3e99272a104fc44770f233a'
+	Public Key ID:
+		e9326f480dd5962560d2b5cb57352aeff4289103
+	Public key's random art:
+		+--[ RSA 2048]----+
+		|      ..o+oo.  ..|
+		|       oo +o  ...|
+		|       . E.. ..  |
+		|      .  o..+.   |
+		|       oS o+.o   |
+		|      ...  .= o  |
+		|     .o..  . o . |
+		|      .+.   .    |
+		|       ..        |
+		+-----------------+
+
+- Certificate[1] info:
+ - subject `C=US,O=Let's Encrypt,CN=Let's Encrypt Authority X3', issuer `O=Digital Signature Trust Co.,CN=DST Root CA X3', RSA key 2048 bits, signed using RSA-SHA256, activated `2016-03-17 16:40:46 UTC', expires `2021-03-17 16:40:46 UTC', SHA-1 fingerprint `e6a3b45b062d509b3382282d196efe97d5956ccb'
+- Status: The certificate is trusted. 
+- Description: (TLS1.2)-(ECDHE-RSA-SECP256R1)-(AES-128-GCM)
+- Session ID: C4:D2:B3:20:74:3C:4A:6D:99:EF:26:DC:F8:42:7E:F5:19:DC:C9:B5:6F:EB:CF:51:D1:84:C8:31:20:26:A1:9E
+- Ephemeral EC Diffie-Hellman parameters
+ - Using curve: SECP256R1
+ - Curve size: 256 bits
+- Version: TLS1.2
+- Key Exchange: ECDHE-RSA
+- Server Signature: RSA-SHA256
+- Cipher: AES-128-GCM
+- MAC: AEAD
+- Compression: NULL
+- Options: safe renegotiation, OCSP status request,
+- Handshake was completed
+
+- Simple Client Mode:
+
+#+end_example
+
+#+BEGIN_SRC sh
+  awk -F'|' '{print $3}' ~/.gnutls/known_hosts
+#+END_SRC
+
+#+RESULTS:
+| marmalade-repo.org |
+| stable.melpa.org   |
+| melpa.org          |
+
+[[https://blogs.fsfe.org/jens.lechtenboerger/2014/03/23/certificate-pinning-for-gnu-emacs/%20%20][Apparently]] =net/gnutls= is vulernable to MITM attacks, so we disable
+it.
+
+#+BEGIN_SRC emacs-lisp
+  (if (fboundp 'gnutls-available-p)
+      (fmakunbound 'gnutls-available-p))
+#+END_SRC
+
+Instead, we use the =gnutls-cli= and =--strict-tofu= to trust hosts in
+=~/.gnutls/known_hosts=. (See above for bootstrapping procedure.)
+
+#+BEGIN_SRC emacs-lisp
+  (setq tls-program '("gnutls-cli --strict-tofu -p %p %h")
+      starttls-extra-arguments '("--strict-tofu"))
+#+END_SRC
+
+Similarly, we use =gnutsl-cli= with certificate pinning when reading
+email, instead of using s_client. (Again, I'm trusting [[https://blogs.fsfe.org/jens.lechtenboerger/2014/03/23/certificate-pinning-for-gnu-emacs/%20%20][this guy]]).
+
+#+BEGIN_SRC emacs-lisp
+  (setq imap-ssl-program '("gnutls-cli --strict-tofu -p %p %s")
+      smtpmail-stream-type 'starttls)
+#+END_SRC

@@ -50,3 +50,11 @@ sequences runs out of elements.
     (should (equal '((1 4)) (zip-seqs '(1 2 3) '(4))))
     (should (equal '() (zip-seqs '(1 2 3) '()))))
 #+END_SRC
+
+* Goto function definition
+
+Jump to a function definition at point with =C-.=.
+
+#+BEGIN_SRC emacs-lisp :results none
+    (evil-define-key 'normal emacs-lisp-mode-map (kbd "C-.") (find-function-at-point))
+#+END_SRC

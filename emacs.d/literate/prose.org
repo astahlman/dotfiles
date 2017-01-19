@@ -15,3 +15,14 @@ We use English as the default language.
 #+END_SRC
 
 Run langtool with =M-x langtool-check=. Clear the messages with =M-x langtool-check-done=.
+
+* Writegood
+
+[[https://github.com/bnbeckwith/writegood-mode][writegood-mode]] highlights weasel-words, passive-voice, and duplicate
+words.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'writegood-mode)
+  (global-set-key "\C-cg" 'writegood-mode)
+#+END_SRC
+

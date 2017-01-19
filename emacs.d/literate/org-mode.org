@@ -81,7 +81,61 @@ that they can be used from any src block.
       (warn "'%s' does not exist and will not be added to the Library of Babel" lob-file)))
 #+END_SRC
 
+** sh
+
+stderr in =sh= blocks is tricky. We can force the exit status of the
+final command run by org-babel to be 0 by always executing the bash
+built-in =:= as the final command. (This is just an alias for true.
+Stole this idea from [[http://kitchingroup.cheme.cmu.edu/blog/2015/01/04/Redirecting-stderr-in-org-mode-shell-blocks/][here]].)
+
+For example, this code block exits with non-zero status, creates a
+warning, and prints nothing in the results block.
+
+#+BEGIN_SRC sh
+ls /foo/bar 2>&1
+#+END_SRC
+
+#+RESULTS:
+
+But this works, if you redirect stderr to stdout.
+
+#+BEGIN_SRC sh :results output
+ls /foo/bar 2>&1
+:
+#+END_SRC
+
+Here's a cleaner way to do it, using prologues and epilogues
+(you can put this in the properties block of a header rather than
+repeat it for every block).
+
+#+BEGIN_SRC sh :prologue "exec 2>&1" :epilogue ":"
+ls /foo/bar
+#+END_SRC
+
+#+RESULTS:
+: ls: cannot access '/foo/bar': No such file or directory
+
+Or, even better, let's just make this the default for any =sh= src
+block.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-babel-default-header-args:sh
+        '((:prologue . "exec 2>&1") (:epilogue . ":")))
+#+END_SRC
+
+#+BEGIN_SRC sh
+    ls /foo/bar
+#+END_SRC
+
+#+RESULTS:
+: ls: cannot access '/foo/bar': No such file or directory
+
+Sweet!
+
+
 * Exporting
+
+** Markdown
 
 Support export to Markdown.
 
@@ -93,18 +147,18 @@ Support export to Markdown.
   (defun replace-stars (i)
     (interactive "n")
     (query-replace (make-string i ?*) (concat ".h" (number-to-string i))))
+#+END_SRC
 
-  (defun export-to-dp (i)
-    "Export an org-mode file to dp, this is a work in progress"
-    (interactive "n")
-    (mark-whole-buffer)
-    (if (= i 0)
-        nil
-      (replace-stars i)
-      (export-to-dp (- i 1))))
+** HTML + Latex
 
-  (defun export-to-media-wiki ()
-    nil)
+org-mode exports documents that include TeX snippets with a Javascript header
+that pulls the MathJax library from an orgmode server. Their
+distribution of MathJax is out of date and doesn't support some of the
+symbols in the =amssymb= package. Instead of pulling MathJax from
+orgmode, we'll pull the latest version directly from the MathJax CDN.
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'org-html-mathjax-options '(path "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"))
 #+END_SRC
 
 * Editing
@@ -181,10 +235,19 @@ Activate the agenda view with =C-c a=.
 
 #+BEGIN_SRC emacs-lisp
   (setq org-agenda-file-regexp "\\`[^.].*\\.org\\'")
-  (setq org-agenda-files '("~/organizer/"))
+  (setq org-agenda-files '("~/organizer/" "~/prose/Wiki/Notes/Rolodex.org.gpg"))
   (global-set-key "\C-ca" 'org-agenda)
 #+END_SRC
 
+This custom command populates the agenda with only today's items.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-agenda-custom-commands
+        '(("d"
+           "Just the current day"
+           ((agenda ""))
+           ((org-agenda-span 1)))))
+#+END_SRC
 * Quick-Note taking
 
 ** Capturing

@@ -1,5 +1,4 @@
 #+TITLE: octave.el
-#+PROPERTY: tangle octave.el
 
 Use octave-mode for files with a '.m' extension.
 

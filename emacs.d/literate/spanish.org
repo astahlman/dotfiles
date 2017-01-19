@@ -384,6 +384,10 @@ Ideal workflow: M-x conjugate "verb" -> Temporary buffer with org-mode table
 
 Maybe using eww?
 
+** TODO Use the org-ctrl-c-ctrl-c-final-hook to toggle corrections
+Consider just evaluating a src block and outputting a results block
+rather than messing with overlays.
+
 * For GC
 #+BEGIN_SRC emacs-lisp
   (defun hide-region-unhide ()
