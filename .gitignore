@@ -17,3 +17,14 @@ emacs.d/ido.last
 vim/.netrwhist
 vim/eclim/**/*
 emacs.d/ensime
+**/.yas-compiled-snippets.el
+network-security.data
+**/*\[\*Org Src*
+ac-comphist.dat
+.cask/
+.org-id-locations
+.python-environments
+emacs.d/abbrev_defs
+emacs.d/bookmarks
+emacs.d/history
+*.bak

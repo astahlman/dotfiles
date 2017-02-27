@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from xml.dom import minidom
 import json
 import sys

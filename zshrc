@@ -62,7 +62,6 @@ export LANG=en_US.UTF-8
 
 # ssh
 # export SSH_KEY_PATH="~/.ssh/dsa_id"
-set -o vi
 
 ### For scrapy ###
 #export PATH=$PATH:/usr/local/share/python
@@ -90,12 +89,16 @@ function marks {
     \ls -l "$MARKPATH" | tail -n +2 | sed 's/  / /g' | cut -d' ' -f9- | awk -F ' -> ' '{printf "%-10s -> %s\n", $1, $2}'
 }
 
-bindkey "^R" history-incremental-search-backward
+#bindkey "^R" history-incremental-search-backward
 
 # no idea what this does...
-bindkey -e
-bindkey -M isearch '^R' history-incremental-search-backward
-bindkey -M isearch '^S' history-incremental-search-forward
+#bindkey -e
+#bindkey -M isearch '^R' history-incremental-search-backward
+#bindkey -M isearch '^S' history-incremental-search-forward
+
+bindkey -v
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
 
 
 case "$TERM" in
@@ -175,7 +178,8 @@ if exists local-post-load-hook; then
     #echo "Post-hook - sourcing local zshell overrides"
     local-post-load-hook
 fi
-source '/Users/andrewstahlman/src/blessclient/lyftprofile' # bless ssh alias
 
 # Don't store commands prefixed with SPACE in history
 setopt HIST_IGNORE_SPACE
+
+set -o vi

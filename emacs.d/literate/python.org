@@ -27,3 +27,15 @@ Connect to the server anytime we are in Python mode.
 #+END_SRC
 
 
+* Rope                                                         :experimental:
+
+Installed Pymacs from source and Rope via pip.
+
+#+BEGIN_SRC emacs-lisp
+  (if (file-exists-p "~/src/Pymacs/pymacs.el")
+      (progn
+	(load "~/src/Pymacs/pymacs.el")
+	(setq pymacs-load-path '("/usr/local/lib/python2.7/site-packages/rope" "/Users/andrewstahlman/src/ropemacs/dist"))
+	(require 'pymacs)
+	(pymacs-load "ropemacs" "rope-")))
+#+END_SRC

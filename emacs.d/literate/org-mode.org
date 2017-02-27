@@ -132,7 +132,33 @@ block.
 
 Sweet!
 
+** yaml support
 
+There's nothing to do for yaml blocks, just return them as-is.
+
+#+BEGIN_SRC emacs-lisp
+  (defun org-babel-execute:yaml (body params) body)
+#+END_SRC
+
+** Evil navigation
+
+Mnemoic: 'h' for header, 'b' for block.
+
+*** Headings
+
+#+BEGIN_SRC emacs-lisp
+(evil-leader/set-key "hn" 'org-next-visible-heading)
+(evil-leader/set-key "hf" 'org-forward-heading-same-level)
+(evil-leader/set-key "hb" 'org-backward-heading-same-level)
+(evil-leader/set-key "hp" 'org-previous-visible-heading)
+#+END_SRC
+
+*** Blocks
+
+#+BEGIN_SRC emacs-lisp
+(evil-leader/set-key "bn" 'org-next-block)
+(evil-leader/set-key "bp" 'org-previous-block)
+#+END_SRC
 * Exporting
 
 ** Markdown
@@ -218,7 +244,7 @@ show up to 10 levels deep.
 
 #+BEGIN_SRC emacs-lisp
   (setq org-goto-interface 'outline-path-completion
-
+        org-outline-path-complete-in-steps nil
         org-goto-max-level 10)
 #+END_SRC
 

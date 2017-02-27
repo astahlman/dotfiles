@@ -1,0 +1,136 @@
+#+TITLE: Scripts
+
+* sample
+
+Sample lines from a text file at a given ratio.
+
+Operates on a file...
+
+#+BEGIN_SRC sh
+for i in {1..100}; do echo $i; done > /tmp/1to100
+./scripts/sample .05 /tmp/1to100
+#+END_SRC
+
+#+RESULTS:
+| 18 |
+| 41 |
+| 71 |
+| 79 |
+| 85 |
+
+Or on stdin.
+
+#+BEGIN_SRC sh
+for i in {1..100}; do echo $i; done | ./scripts/sample .04
+#+END_SRC
+
+#+RESULTS:
+| 54 |
+| 88 |
+
+#+BEGIN_SRC sh :shebang #!/bin/bash :tangle scripts/sample
+  #######################################
+  ## Usage: sample $ratio [ $filename ]
+  #######################################
+
+  if [[ $# -eq 2 ]]
+  then
+	  cmd="awk 'BEGIN {srand()} !/^\$/ { if (rand() <= $1) print \$0}' $2"
+  elif [[ $# -eq 1 ]]
+  then
+	  cmd="awk 'BEGIN {srand()} !/^\$/ { if (rand() <= $1) print \$0}'"
+  else
+	  echo "Usage: sample $ratio [ $filename ]"
+  fi
+  eval "$cmd"
+#+END_SRC
+
+* xml2json
+
+Converts XML from stdin to JSON on stdout, like this:
+
+#+BEGIN_SRC sh :results output
+  cat <<EOF | ./scripts/xml2json
+  <note>
+	  <to>Tove</to>
+	  <from>Jani</from>
+	  <heading>Reminder</heading>
+	  <body>Don't forget me this weekend!</body>
+  </note>
+  EOF
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+{
+     "note": {
+          "#text": [
+               {
+                    "data": "\n\t"
+               }, 
+               {
+                    "data": "\n\t"
+               }, 
+               {
+                    "data": "\n\t"
+               }, 
+               {
+                    "data": "\n\t"
+               }, 
+               {
+                    "data": "\n"
+               }
+          ], 
+          "body": {
+               "#text": {
+                    "data": "Don't forget me this weekend!"
+               }
+          }, 
+          "from": {
+               "#text": {
+                    "data": "Jani"
+               }
+          }, 
+          "heading": {
+               "#text": {
+                    "data": "Reminder"
+               }
+          }, 
+          "to": {
+               "#text": {
+                    "data": "Tove"
+               }
+          }
+     }
+}
+#+end_example
+
+#+BEGIN_SRC python :shebang #!/usr/bin/python :tangle scripts/xml2json
+  from xml.dom import minidom
+  import json
+  import sys
+  def parse_element(element):
+      dict_data = dict()
+      if element.nodeType == element.TEXT_NODE:
+          dict_data['data'] = element.data
+      if element.nodeType not in [element.TEXT_NODE, element.DOCUMENT_NODE, 
+                                  element.DOCUMENT_TYPE_NODE]:
+          for item in element.attributes.items():
+              dict_data[item[0]] = item[1]
+      if element.nodeType not in [element.TEXT_NODE, element.DOCUMENT_TYPE_NODE]:
+          for child in element.childNodes:
+              child_name, child_dict = parse_element(child)
+              if child_name in dict_data:
+                  try:
+                      dict_data[child_name].append(child_dict)
+                  except AttributeError:
+                      dict_data[child_name] = [dict_data[child_name], child_dict]
+              else:
+                  dict_data[child_name] = child_dict 
+      return element.nodeName, dict_data
+
+  if __name__ == '__main__':
+      dom = minidom.parseString(sys.stdin.read())
+      node_name, data = parse_element(dom)
+      print(json.dumps(data, sort_keys=True, indent=5))
+#+END_SRC

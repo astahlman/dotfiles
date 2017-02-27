@@ -11,11 +11,17 @@ buffer.
 
 * Whitespace
 
-Always highlight trailing whitespace.
+Always use spaces to indent.
+
+#+BEGIN_SRC emacs-lisp
+(setq-default indent-tabs-mode nil)
+#+END_SRC
+
+Always highlight trailing whitespace and mixed spaces and tabs.
 
 #+BEGIN_SRC emacs-lisp
   (global-whitespace-mode)
-  (setq whitespace-style '(face trailing))
+  (setq whitespace-style '(face tabs spaces trailing space-before-tab space-after-tab))
 #+END_SRC
 
 * Auto-completion
@@ -188,4 +194,21 @@ email, instead of using s_client. (Again, I'm trusting [[https://blogs.fsfe.org/
 #+BEGIN_SRC emacs-lisp
   (setq imap-ssl-program '("gnutls-cli --strict-tofu -p %p %s")
       smtpmail-stream-type 'starttls)
+#+END_SRC
+
+* TODO yasnippet
+
+Temporarily use =yas/expand=, because =yas-expand= is acting
+weird. See [[file:~/organizer/devlog.org::*Fix%20yas-expand][Fix yas-expand]].
+
+#+BEGIN_SRC emacs-lisp
+(evil-define-key 'insert org-mode-map (kbd "<tab>") 'yas/expand)
+#+END_SRC
+* Packaging
+
+Use [[https://github.com/purcell/flycheck-package][flycheck-package]] to lint the source of Emacs packages.
+
+#+BEGIN_SRC emacs-lisp
+(eval-after-load 'flycheck
+  '(flycheck-package-setup))
 #+END_SRC

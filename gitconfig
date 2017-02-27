@@ -3,10 +3,19 @@
 [color]
 	ui = true
 [core]
-	pager = less -FMRiX
+	# TODO: Why doesn't this to less?
+	#pager = "which diff-so-fancy &> /dev/null; [[ $? = 0 ]] && p='diff-so-fancy | less --tabs=4 -RFX' || p='less -FMRiX'; $p"
+	pager = "diff-so-fancy | less --tabs=4 -FMRiX"
 	excludesfile = ~/dotfiles/gitignore_global
 	editor = vim
 [push]
 	default = current
 [include]
 	path = ~/dotfiles/gitconfig_local
+
+# For diff-so-fancy
+[color "diff-highlight"]
+	oldNormal = red bold
+	oldHighlight = red bold 52
+	newNormal = green bold
+	newHighlight = green bold 22

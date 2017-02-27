@@ -1,0 +1,15 @@
+#!/bin/bash
+#######################################
+## Usage: sample $ratio [ $filename ]
+#######################################
+
+if [[ $# -eq 2 ]]
+then
+	cmd="awk 'BEGIN {srand()} !/^\$/ { if (rand() <= $1) print \$0}' $2"
+elif [[ $# -eq 1 ]]
+then
+	cmd="awk 'BEGIN {srand()} !/^\$/ { if (rand() <= $1) print \$0}'"
+else
+	echo "Usage: sample $ratio [ $filename ]"
+fi
+eval "$cmd"
