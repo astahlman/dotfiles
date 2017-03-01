@@ -53,3 +53,40 @@ Uses key-chord mode to define 'jk' as a keychord bound to <Esc>.
 (key-chord-define evil-insert-state-map  "jk" 'evil-normal-state)
 #+END_SRC
 
+* Buffer and Window Manipulation
+
+Default behavior for =:q= is to kill the Emacs frame. I almost never
+do that, so instead I'll use it to kill the buffer.
+
+#+BEGIN_SRC emacs-lisp
+  (evil-ex-define-cmd "q" 'evil-delete-buffer)
+#+END_SRC
+
+Use =:e= in place of =C-x C-f=.
+
+#+BEGIN_SRC emacs-lisp
+  (evil-ex-define-cmd "edit" 'helm-find-files)
+#+END_SRC
+
+Use =:x= for =M-x=.
+
+#+BEGIN_SRC emacs-lisp
+  (evil-ex-define-cmd "x" 'helm-M-x)
+#+END_SRC
+
+Use =:b= for =M-x b=
+
+#+BEGIN_SRC emacs-lisp
+  (evil-ex-define-cmd "b" 'switch-to-buffer)
+#+END_SRC
+
+
+Use =<leader> w= for window commands.
+
+#+BEGIN_SRC emacs-lisp
+(evil-leader/set-key "wk" 'evil-window-up)
+(evil-leader/set-key "wj" 'evil-window-down)
+(evil-leader/set-key "wh" 'evil-window-left)
+(evil-leader/set-key "wl" 'evil-window-right)
+#+END_SRC
+

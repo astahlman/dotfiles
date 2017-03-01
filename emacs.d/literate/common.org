@@ -175,9 +175,17 @@ Connecting to '104.236.16.183:443'...
 [[https://blogs.fsfe.org/jens.lechtenboerger/2014/03/23/certificate-pinning-for-gnu-emacs/%20%20][Apparently]] =net/gnutls= is vulernable to MITM attacks, so we disable
 it.
 
-#+BEGIN_SRC emacs-lisp
+TODO: Why did I do this? Trying to load email through =gnus= results
+in an error when =gnutls-available-p= is called.
+
+#+BEGIN_EXAMPLE
   (if (fboundp 'gnutls-available-p)
       (fmakunbound 'gnutls-available-p))
+#+END_EXAMPLE
+
+#+BEGIN_SRC emacs-lisp
+  (defun gnutls-available-p ()
+    nil)
 #+END_SRC
 
 Instead, we use the =gnutls-cli= and =--strict-tofu= to trust hosts in
