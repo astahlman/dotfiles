@@ -89,17 +89,16 @@ function marks {
     \ls -l "$MARKPATH" | tail -n +2 | sed 's/  / /g' | cut -d' ' -f9- | awk -F ' -> ' '{printf "%-10s -> %s\n", $1, $2}'
 }
 
-#bindkey "^R" history-incremental-search-backward
+# Use vi keybindings
+set -o vi
 
-# no idea what this does...
-#bindkey -e
-#bindkey -M isearch '^R' history-incremental-search-backward
-#bindkey -M isearch '^S' history-incremental-search-forward
-
-bindkey -v
+# <C-r> or <C-s> to search backwards or forwards in shell history
 bindkey '^R' history-incremental-search-backward
 bindkey '^S' history-incremental-search-forward
 
+# Use <C-r> <C-s> to cycle through history while searching
+bindkey -M isearch '^R' history-incremental-search-backward
+bindkey -M isearch '^S' history-incremental-search-forward
 
 case "$TERM" in
 "dumb")
@@ -181,5 +180,3 @@ fi
 
 # Don't store commands prefixed with SPACE in history
 setopt HIST_IGNORE_SPACE
-
-set -o vi

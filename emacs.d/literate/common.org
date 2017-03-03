@@ -220,3 +220,29 @@ Use [[https://github.com/purcell/flycheck-package][flycheck-package]] to lint th
 (eval-after-load 'flycheck
   '(flycheck-package-setup))
 #+END_SRC
+* Email
+
+See [[file:~/.gnus::(setq%20gnus-select-method][~/.gnus]] for more configuration.
+
+#+BEGIN_SRC emacs-lisp
+  (setq send-mail-function 'smtpmail-send-it
+	smtpmail-debug-info t)
+#+END_SRC
+
+Sometimes when Gmail's certificate changes I need to manually connect
+with gnutls-cli and trust the new certificate, like this:
+
+#+BEGIN_SRC sh
+gnutls-cli --verbose --starttls --tofu -p 587 smtp.gmail.com
+#+END_SRC
+
+This will initiate a connection. Type the following commands to
+negotiate a TLS session:
+
+1. ehlo hostname
+2. starttls
+3. ^D (Ctrl-D)
+
+Then 'y' to trust the new certificate.
+
+

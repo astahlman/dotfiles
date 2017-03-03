@@ -24,6 +24,7 @@
         evil
         evil-leader
         exec-path-from-shell
+        feature-mode
         find-file-in-project
         flycheck
         flycheck-package
@@ -48,6 +49,7 @@
         key-chord
         langtool
         latex-preview-pane
+        magit
         markdown-mode
         math-symbol-lists
         muse

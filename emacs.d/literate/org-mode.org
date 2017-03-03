@@ -197,6 +197,16 @@ orgmode, we'll pull the latest version directly from the MathJax CDN.
           '((path "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"))))
 #+END_SRC
 
+** Super/Sub-scripting
+
+Use LaTeX syntax for super and subscripts. That is, require x_{0}
+instead of just x_0. This makes it easier to export files that have
+snake_case variable names, or any content that uses underscores.
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-export-with-sub-superscripts `{})
+#+END_SRC
+
 * Editing
 
 ** Add date property
