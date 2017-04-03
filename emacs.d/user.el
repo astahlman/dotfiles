@@ -63,6 +63,7 @@
         org-bullets
         org-gcal
         org-mime
+        org-random-todo
         ox-mediawiki
         package-lint
         paredit

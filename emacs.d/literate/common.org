@@ -21,8 +21,9 @@ Always highlight trailing whitespace and mixed spaces and tabs.
 
 #+BEGIN_SRC emacs-lisp
   (global-whitespace-mode)
-  (setq whitespace-style '(face tabs spaces trailing space-before-tab space-after-tab))
+  (setq whitespace-style '(face trailing space-before-tab space-after-tab))
 #+END_SRC
+
 
 * Auto-completion
 

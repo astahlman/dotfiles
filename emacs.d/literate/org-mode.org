@@ -604,3 +604,11 @@ The Cider API changed recently, so [[http://orgmode.org/w/org-mode.git?p=org-mod
 locally in emacs.d/elpa/org-$version/ob-clojure.el until it gets
 pushed to ELPA. TODO: Move this to emacs.d/patches, or remove it if it
 is no longer needed.
+* Random TODO Reminders
+Pop up a random TODO from my agenda files once a day.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'org-random-todo)
+  (setq org-random-todo-how-often (* 24 60 60))
+  (org-random-todo-mode 1)
+#+END_SRC
