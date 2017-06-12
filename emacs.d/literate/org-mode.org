@@ -354,11 +354,14 @@ Use =org-refile= to move a heading somewhere else. Default binding is
 =C-c C-w=. You can also use =C-u C-c C-w= to jump to a target, like
 just =org-goto=.
 
-=nil= means look for candidates in the current buffer, ~(:maxlevel . 10)~
-controls how deep in the tree we look.
+Look for candidates in the current buffer as well as all agenda
+files. ~(:maxlevel . 10)~ controls how deep in the tree we look.
 
 #+BEGIN_SRC emacs-lisp
-  (setq org-refile-targets '((nil . (:maxlevel . 10))))
+  (setq org-refile-use-outline-path t)
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-targets '((nil . (:maxlevel . 10))
+                             (org-agenda-files :maxlevel . 9)))
 #+END_SRC
 
 Sometimes, we want to move this heading to a different file
@@ -373,9 +376,6 @@ altogether. =org-refile-foreign= prompts for a file and then calls
            (org-refile-targets `(((,target-file) . (:maxlevel . 10)))))
       (org-refile)))
 #+END_SRC
-
-#+RESULTS:
-: org-refile-foreign
 
 Sometimes we know exactly where we want to refile. For example, when
 importing captures, we always want to put them in the main organizer

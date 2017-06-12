@@ -23,6 +23,5 @@ words.
 
 #+BEGIN_SRC emacs-lisp
   (require 'writegood-mode)
-  (global-set-key "\C-cg" 'writegood-mode)
 #+END_SRC
 

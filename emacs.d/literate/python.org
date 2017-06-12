@@ -26,12 +26,14 @@ Connect to the server anytime we are in Python mode.
 (add-hook 'python-mode-hook 'jedi:setup)
 #+END_SRC
 
-
 * Rope                                                         :experimental:
 
-Installed Pymacs from source and Rope via pip.
+Rope is an alternative to Jedi - elpy uses one or the other. For now
+I'm going to try Jedi, so I'll leave this disabled.
 
-#+BEGIN_SRC emacs-lisp
+I installed Pymacs from source and Rope via pip.
+
+#+BEGIN_SRC emacs-lisp :tangle no :exports none
   (if (file-exists-p "~/src/Pymacs/pymacs.el")
       (progn
 	(load "~/src/Pymacs/pymacs.el")
@@ -39,3 +41,4 @@ Installed Pymacs from source and Rope via pip.
 	(require 'pymacs)
 	(pymacs-load "ropemacs" "rope-")))
 #+END_SRC
+

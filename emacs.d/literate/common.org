@@ -93,6 +93,28 @@ Fuzzy-search for all files in the current git repository with
   (require 'helm-ls-git)
   (global-set-key (kbd "C-x C-p") 'helm-browse-project)
 #+END_SRC
+
+** git-grep
+
+Use =C-c g= to invoke incremental git-grep via Helm.
+#+BEGIN_SRC emacs-lisp
+(require 'helm-git-grep)
+(global-set-key (kbd "C-c g") 'helm-git-grep)
+#+END_SRC
+
+Invoke =helm-git-grep= from isearch.
+
+#+BEGIN_SRC emacs-lisp
+(define-key isearch-mode-map (kbd "C-c g") 'helm-git-grep-from-isearch)
+#+END_SRC
+
+Invoke =helm-git-grep= from other helm.
+
+#+BEGIN_SRC emacs-lisp
+(eval-after-load 'helm
+  '(define-key helm-map (kbd "C-c g") 'helm-git-grep-from-helm))
+#+END_SRC
+
 * YAML
 
 Use yaml-mode when editing =.sls= (Salt stack config) and =.yaml=
@@ -204,14 +226,15 @@ email, instead of using s_client. (Again, I'm trusting [[https://blogs.fsfe.org/
       smtpmail-stream-type 'starttls)
 #+END_SRC
 
-* TODO yasnippet
+* yasnippet
 
-Temporarily use =yas/expand=, because =yas-expand= is acting
-weird. See [[file:~/organizer/devlog.org::*Fix%20yas-expand][Fix yas-expand]].
+Turn on yasnippet globally.
 
 #+BEGIN_SRC emacs-lisp
-(evil-define-key 'insert org-mode-map (kbd "<tab>") 'yas/expand)
+(require 'yasnippet)
+(yas-global-mode 1)
 #+END_SRC
+
 * Packaging
 
 Use [[https://github.com/purcell/flycheck-package][flycheck-package]] to lint the source of Emacs packages.
@@ -220,6 +243,7 @@ Use [[https://github.com/purcell/flycheck-package][flycheck-package]] to lint th
 (eval-after-load 'flycheck
   '(flycheck-package-setup))
 #+END_SRC
+
 * Email
 
 See [[file:~/.gnus::(setq%20gnus-select-method][~/.gnus]] for more configuration.
@@ -245,4 +269,19 @@ negotiate a TLS session:
 
 Then 'y' to trust the new certificate.
 
+* git
+** Linking to Github
+
+Generate links to a specific commit rather than referencing a
+branch. That is, generate links like this:
+
+- https://github.com/apache/incubator-airflow/blob/f5462c78ff38ec59ec30c688097ff5bb3b3541bb/airflow/jobs.py#L1905
+
+Not this:
+
+- https://github.com/apache/incubator-airflow/blob/master/airflow/jobs.py#L1905
+
+#+BEGIN_SRC emacs-lisp
+(setq git-link-use-commit t)
+#+END_SRC
 

@@ -17,6 +17,7 @@
         company
         dash
         elisp-slime-nav
+        elpy
         ensime
         epl
         erc-terminal-notifier
@@ -33,11 +34,13 @@
         format-sql
         function-args  ; for C/C++ function argument completion
         ggtags
+        git-link
         gnuplot
         gnuplot-mode
         google-translate
         helm
         helm-ag
+        helm-git-grep
         helm-gtags  ; helm integration with GNU global
         helm-ls-git
         highlight-indentation
@@ -54,6 +57,7 @@
         math-symbol-lists
         muse
         nyan-mode
+        ob-async
         org-plus-contrib
         org-beautify-theme
         org-bullets

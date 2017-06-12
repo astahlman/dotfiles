@@ -180,3 +180,101 @@ fi
 
 # Don't store commands prefixed with SPACE in history
 setopt HIST_IGNORE_SPACE
+
+set -o vi
+
+# GPG
+function gpg-agent-restart {
+    killall gpg-agent
+    gpg-agent --daemon --enable-ssh-support --write-env-file
+    gpg-agent-reload-info
+}
+
+function gpg-agent-reload-info {
+    source ~/.gpg-agent-info
+    export GPG_AGENT_INFO
+    export SSH_AUTH_SOCK
+    export SSH_AGENT_PID
+}
+
+function gpg-agent-restart {
+    if test -f ~/.gpg-agent-info && \
+            kill -0 `grep GPG_AGENT_INFO $HOME/.gpg-agent-info | cut -d: -f2` 2>/dev/null; then
+        gpg-agent-reload-info
+    else
+        eval `gpg-agent --daemon --write-env-file`
+    fi
+}
+
+gpg-agent-restart
+GPG_TTY=$(tty)
+export GPG_TTY
+
+# Use 'e' to open a file in an existing emacs session
+function e() {
+         emacsclient --no-wait $*
+}
+
+function ff() {
+         find $(pwd) -name "*${1}*" | tee >(pbcopy)
+}
+
+# fuzzyy-finding via fzf
+[[ -f "$HOME/.fzf.zsh" ]] && source "$HOME/.fzf.zsh" || echo "[WARNING] Couldn't find ~/.fzf.zsh. Is fzf installed? (https://github.com/junegunn/fzf)" >&2
+
+# Setup Marker to templatize common commands
+# Invoke the menu with Ctrl-Space
+# Bookmark a command with Ctrl-k
+# Jump to next placeholder with Ctrl-t
+if [[ -s "$HOME/.local/share/marker/marker.sh" ]]; then
+   source "$HOME/.local/share/marker/marker.sh"
+else
+   echo "[WARNING] Couldn't find marker configuration. Is it installed? (https://github.com/pindexis/marker)" >&2
+fi
+
+#############################################################################
+# Marker fzf integration                                                    #
+#############################################################################
+# marker template select
+FZF_MARKER_CONF_DIR="$HOME/.local/share/marker"
+_fzf_marker_main_widget() {
+  if echo "$BUFFER" | grep -q -P "{{"; then
+    _fzf_marker_placeholder
+  else
+    local selected
+    if selected=$(cat ${FZF_MARKER_CONF_DIR:-~/.config/marker}/*.txt |
+      sed -e "s/\(^[a-zA-Z0-9_-]\+\)\s/${FZF_MARKER_COMMAND_COLOR:-\x1b[38;5;255m}\1\x1b[0m /" \
+          -e "s/\s*\(#\+\)\(.*\)/${FZF_MARKER_COMMENT_COLOR:-\x1b[38;5;8m}  \1\2\x1b[0m/" |
+      fzf --bind 'tab:down,btab:up' --height=80% --ansi -q "$LBUFFER"); then
+      LBUFFER=$(echo $selected | sed 's/\s*#.*//')
+    fi
+    zle redisplay
+  fi
+}
+
+_fzf_marker_placeholder() {
+  local strp pos placeholder
+  strp=$(echo $BUFFER | grep -Z -P -b -o "\{\{[\w]+\}\}")
+  strp=$(echo "$strp" | head -1)
+  pos=$(echo $strp | cut -d ":" -f1)
+  placeholder=$(echo $strp | cut -d ":" -f2)
+  if [[ -n "$1" ]]; then
+    BUFFER=$(echo $BUFFER | sed -e "s/{{//" -e "s/}}//")
+    CURSOR=$(($pos + ${#placeholder} - 4))
+  else
+    BUFFER=$(echo $BUFFER | sed "s/$placeholder//")
+    CURSOR=pos
+  fi
+}
+
+_fzf_marker_placeholder_widget() { _fzf_marker_placeholder "defval" }
+
+zle -N _fzf_marker_main_widget
+zle -N _fzf_marker_placeholder_widget
+bindkey "${FZF_MARKER_MAIN_KEY:-\C-@}" _fzf_marker_main_widget
+bindkey "${FZF_MARKER_PLACEHOLDER_KEY:-\C-v}" _fzf_marker_placeholder_widget
+###########################################################################
+
+# Add every dir under ~/scripts to $PATH (e.g., ~/scripts/lyft_local)
+SCRIPT_DIRS=$(find -d $HOME/dotfiles/scripts -type d | tr '\n' ':')
+PATH="${PATH}:${SCRIPT_DIRS}"
