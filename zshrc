@@ -18,26 +18,6 @@ export ZSH=$HOME/.oh-my-zsh
 # time that oh-my-zsh is loaded.
 ZSH_THEME="robbyrussell"
 
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
-
-# Uncomment the following line to disable command auto-correction.
-# DISABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
-
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
-
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
@@ -50,18 +30,6 @@ source $ZSH/oh-my-zsh.sh
 # You may need to manually set your language environment
 export LANG=en_US.UTF-8
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
 
 ### For scrapy ###
 #export PATH=$PATH:/usr/local/share/python
@@ -76,13 +44,13 @@ alias u="cd ..; ls"
 
 # jump to marks
 export MARKPATH=$HOME/.marks
-function jump { 
+function jump {
     cd -P "$MARKPATH/$1" 2>/dev/null || echo "No such mark: $1"
 }
-function mark { 
+function mark {
     mkdir -p "$MARKPATH"; ln -s "$(pwd)" "$MARKPATH/$1"
 }
-function unmark { 
+function unmark {
     rm -i "$MARKPATH/$1"
 }
 function marks {
@@ -114,7 +82,7 @@ esac
 
 # Specific to OS X
 function ppjson {
-    cat $1 | python -m json.tool 
+    cat $1 | python -m json.tool
 }
 
 autoload -U compinit
@@ -181,8 +149,6 @@ fi
 # Don't store commands prefixed with SPACE in history
 setopt HIST_IGNORE_SPACE
 
-set -o vi
-
 # GPG
 function gpg-agent-restart {
     killall gpg-agent
@@ -206,9 +172,13 @@ function gpg-agent-restart {
     fi
 }
 
-gpg-agent-restart
-GPG_TTY=$(tty)
-export GPG_TTY
+## Seems like the gpg-agent that's installed on Ubuntu
+## is started automatically by gpg
+if [[ $(gpg-agent --version | head -n1) != *2.1.11 ]]; then
+    gpg-agent-restart
+    GPG_TTY=$(tty)
+    export GPG_TTY
+fi
 
 # Use 'e' to open a file in an existing emacs session
 function e() {
@@ -219,7 +189,7 @@ function ff() {
          find $(pwd) -name "*${1}*" | tee >(pbcopy)
 }
 
-# fuzzyy-finding via fzf
+# fuzzy-finding via fzf
 [[ -f "$HOME/.fzf.zsh" ]] && source "$HOME/.fzf.zsh" || echo "[WARNING] Couldn't find ~/.fzf.zsh. Is fzf installed? (https://github.com/junegunn/fzf)" >&2
 
 # Setup Marker to templatize common commands
@@ -276,5 +246,5 @@ bindkey "${FZF_MARKER_PLACEHOLDER_KEY:-\C-v}" _fzf_marker_placeholder_widget
 ###########################################################################
 
 # Add every dir under ~/scripts to $PATH (e.g., ~/scripts/lyft_local)
-SCRIPT_DIRS=$(find -d $HOME/dotfiles/scripts -type d | tr '\n' ':')
+SCRIPT_DIRS=$(find $HOME/dotfiles/scripts -type d | tr '\n' ':')
 PATH="${PATH}:${SCRIPT_DIRS}"

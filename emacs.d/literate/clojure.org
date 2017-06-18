@@ -1,9 +1,12 @@
 #+TITLE: clojure.el
 
-
 * Description
 
 This file contains all of my Clojure specific tooling.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'clojure-mode)
+#+END_SRC
 
 * Editing
 
@@ -18,6 +21,12 @@ Rainbow delimiters are nice to have everywhere.
 #+BEGIN_SRC emacs-lisp
   (require 'rainbow-delimiters)
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+#+END_SRC
+
+Always activate paredit when in a Clojure file.
+
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'clojure-mode-hook 'paredit-mode)
 #+END_SRC
 
 * Cider
@@ -41,7 +50,6 @@ Make the REPL popup when it (finally) connects.
 The stacktrace buffer should always pop to the front on errors.
 
 #+BEGIN_SRC emacs-lisp
-  
   (setq cider-popup-stacktraces t)
   (setq cider-repl-popup-stacktraces t)
   (setq cider-auto-select-error-buffer t)
@@ -59,7 +67,6 @@ Log nrepl messages so we can debug when things go wrong.
 #+BEGIN_SRC emacs-lisp
 (setq nrepl-log-messages t)
 #+END_SRC
-
 
 Show the signature of the current function in the echo area.
 
@@ -105,5 +112,11 @@ Cider. TODO: Actually look for the Cider window.
         (insert content))))
 
   (global-set-key (kbd "C-c C-s") 'send-to-cider)
-
 #+END_SRC
+
+Use =C-c C-b= to evalute the buffer.
+
+#+BEGIN_SRC emacs-lisp
+(define-key clojure-mode-map (kbd "C-c C-b") 'cider-eval-buffer)
+#+END_SRC
+

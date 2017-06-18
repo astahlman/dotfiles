@@ -1,16 +1,22 @@
 # Setup fzf
 # ---------
-if [[ ! "$PATH" == */Users/andrewstahlman/tools/fzf/bin* ]]; then
-  export PATH="$PATH:/Users/andrewstahlman/tools/fzf/bin"
+FZF_ROOT="$HOME/tools/fzf"
+FZF_BIN="$HOME/tools/fzf/bin/"
+if [[ -d "$FZF_BIN" ]]; then
+    if [[ ! "$PATH" == *$FZF_BIN* ]]; then
+      export PATH="$PATH:$FZF_BIN"
+    fi
+else
+  echo "Could not find fzf on the \$PATH. Is it installed?"
 fi
 
 # Auto-completion
 # ---------------
-[[ $- == *i* ]] && source "/Users/andrewstahlman/tools/fzf/shell/completion.zsh" 2> /dev/null
+[[ $- == *i* ]] && source "${FZF_ROOT}/shell/completion.zsh" 2> /dev/null
 
 # Key bindings
 # ------------
-source "/Users/andrewstahlman/tools/fzf/shell/key-bindings.zsh"
+source "${FZF_ROOT}/shell/key-bindings.zsh"
 
 # fd - fuzzy cd to selected directory
 fd() {
@@ -20,10 +26,9 @@ fd() {
   cd "$dir"
 }
 
-# fag - fuzzay ag (with an unfortunate mnemonic)
+# fag - fuzzy ag (with an unfortunate mnemonic)
 fag() {
   local search_string
   search_string=$(printf ",%s" "$@");
-  echo "${search_string:1}"
-  #ag --nobreak --nonumbers --noheading "$*" | fzf
+  ag --nobreak --nonumbers --noheading "$*" | fzf
 }
