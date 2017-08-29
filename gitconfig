@@ -1,6 +1,7 @@
 [alias]
 	dag = log --graph --format='format:%C(yellow)%h%C(reset) %C(blue)\"%an\" <%ae>%C(reset) %C(magenta)%cr%C(reset)%C(red)%d%C(reset)%n%s' --date-order
-	recent = for-each-ref --count=7 --sort=-committerdate refs/heads/ --format=\"%(refname:short)\"
+	recent = "!f() { git for-each-ref --count=${1:-7} --sort=-committerdate refs/heads/ --format='%(refname:short)'; }; f"
+	aliases = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
 [color]
 	ui = true
 [core]
