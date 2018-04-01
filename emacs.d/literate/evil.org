@@ -80,7 +80,6 @@ Use =:b= for =M-x b=
   (evil-ex-define-cmd "b" 'switch-to-buffer)
 #+END_SRC
 
-
 Use =<leader> w= for window commands.
 
 #+BEGIN_SRC emacs-lisp
@@ -90,3 +89,32 @@ Use =<leader> w= for window commands.
 (evil-leader/set-key "wl" 'evil-window-right)
 #+END_SRC
 
+* Escaping Evil Mode
+
+Some modes just don't play well with Evil mode. For these, just revert
+to normal Emacs editing. (Stolen from [[https://github.com/bling/dotemacs/blob/master/config/init-evil.el][here]]).
+
+#+BEGIN_SRC emacs-lisp
+    (defcustom dotemacs-evil/emacs-state-modes
+      '(edebug-mode
+        git-commit-mode
+        magit-blame-mode
+        Info-mode)
+      "List of modes that when active should switch to Emacs state."
+      :type '(repeat (symbol))
+      :group 'dotemacs-evil)
+
+#+END_SRC
+
+#+RESULTS:
+: dotemacs-evil/emacs-state-modes
+
+#+BEGIN_SRC emacs-lisp
+  (require 'cl-macs)
+  (cl-loop for mode in dotemacs-evil/emacs-state-modes
+           do (let ((hook (concat (symbol-name mode) "-hook")))
+                (add-hook (intern hook) `(lambda ()
+                                           (turn-off-evil-mode)))))
+#+END_SRC
+
+#+RESULTS:

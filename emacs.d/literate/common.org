@@ -117,6 +117,17 @@ Fuzzy-search for all files in the current git repository with
   (global-set-key (kbd "C-x C-p") 'helm-browse-project)
 #+END_SRC
 
+*** Recent Files, Buffers, etc.
+
+Use =C-x C-r= to invoke =helm-for-files=, which searches recent
+buffers and files as well as files under the current directory.
+
+#+BEGIN_SRC emacs-lisp
+  (recentf-mode 1)
+  (setq recentf-max-menu-items 15)
+  (global-set-key (kbd "C-x C-r") 'helm-for-files)
+#+END_SRC
+
 ** git-grep
 
 Use =C-c g= to invoke incremental git-grep via Helm.
@@ -318,3 +329,16 @@ Not this:
 (setq git-link-use-commit t)
 #+END_SRC
 
+* Faces
+
+#+BEGIN_SRC emacs-lisp
+  (defun what-face (pos)
+    "Which font face is under point?"
+    (interactive "d")
+    (let ((face (or (get-char-property pos 'read-face-name)
+                    (get-char-property pos 'face))))
+      (if face (message "Face: %s" face) (message "No face at %d" pos))))
+#+END_SRC
+
+#+RESULTS:
+: what-face

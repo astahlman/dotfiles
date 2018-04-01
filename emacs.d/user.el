@@ -8,7 +8,6 @@
         annotate
         async
         auctex
-        auto-complete
         blockdiag-mode
         buffer-move
         cider
@@ -19,14 +18,15 @@
         clojure-test-mode
         company
         dash
+        edebug-x
         elisp-slime-nav
         elpy
-        ensime
         epl
         erc-terminal-notifier
         ess
         evil
         evil-leader
+        evil-magit
         exec-path-from-shell
         feature-mode
         find-file-in-project
@@ -58,7 +58,6 @@
         latex-preview-pane
         lsp-mode
         lsp-python
-        ;;magit
         magit-gh-pulls
         markdown-mode
         math-symbol-lists
@@ -70,7 +69,6 @@
         org-bullets
         org-gcal
         org-mime
-        org-random-todo
         ox-mediawiki
         package-lint
         paredit
@@ -80,6 +78,7 @@
         pyvenv
         queue
         rainbow-delimiters
+        realgud
         s
         sbt-mode
         smart-mode-line
@@ -372,6 +371,7 @@
           (gnuplot . t)
           (calc . t)
           (sql . t)
+          (js . t)
           (latex . t)))
 
 ;; Turn on evil before we load anything else so that we can use

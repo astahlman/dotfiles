@@ -58,3 +58,11 @@ Jump to a function definition at point with =C-.=.
 #+BEGIN_SRC emacs-lisp :results none
     (evil-define-key 'normal emacs-lisp-mode-map (kbd "C-.") (find-function-at-point))
 #+END_SRC
+
+* edebug
+
+Edebug gives some nice functions like =edebug-x-show-instrumented=.
+
+#+BEGIN_SRC emacs-lisp
+  (require 'edebug-x)
+#+END_SRC

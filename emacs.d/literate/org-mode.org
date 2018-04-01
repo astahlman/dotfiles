@@ -56,18 +56,20 @@ the same form returned by =(current-time)=.
 #+BEGIN_SRC emacs-lisp
   (defun record-timing-info (orig-fn &optional arg info params)
     "Records the execution duration of an org-babel src block org-babel-execute-src-block-duration"
-    (let ((start-time (current-time)))
-      (funcall orig-fn arg info params)
+    (let ((start-time (current-time))
+          (original-result (funcall orig-fn arg info params)))
       (let* ((delta (time-subtract (current-time)
 				   start-time))
 	     (seconds (cadr delta))
 	     (micros (nth 2 delta))
 	     (millis (/ micros 1000)))
-	(ring-insert org-babel-src-block-execution-durations delta)
-	(message "Elapsed: %s.%s seconds" seconds millis))))
+        (ring-insert org-babel-src-block-execution-durations delta)
+        (message "Elapsed: %s.%s seconds" seconds millis)
+        original-result)))
 
   (advice-add 'org-babel-execute-src-block :around #'record-timing-info)
 #+END_SRC
+
 
 ** Library of Babel
 
@@ -164,10 +166,22 @@ Mnemoic: 'h' for header, 'b' for block.
 
 #+BEGIN_SRC emacs-lisp
   (require 'ob-async)
-  (add-to-list 'org-ctrl-c-ctrl-c-hook 'ob-async-org-babel-execute-src-block)
 #+END_SRC
 
+#+BEGIN_SRC sh :async
+echo "hi"
+
+#+END_SRC
+
+#+RESULTS:
+: hi
+
+
 * Exporting
+
+#+BEGIN_SRC emacs-lisp
+(require 'ox)
+#+END_SRC
 
 ** Markdown
 
@@ -185,17 +199,16 @@ Support export to Markdown.
 
 ** HTML + Latex
 
-org-mode exports documents that include TeX snippets with a Javascript header
-that pulls the MathJax library from an orgmode server. Their
+org-mode exports documents that include TeX snippets with a Javascript
+header that pulls the MathJax library from an orgmode server. Their
 distribution of MathJax is out of date and doesn't support some of the
 symbols in the =amssymb= package. Instead of pulling MathJax from
-orgmode, we'll pull the latest version directly from the MathJax CDN.
+orgmode, we'll pull the latest version directly from a CDN.
 
 #+BEGIN_SRC emacs-lisp
   (with-eval-after-load 'ox-html
-    (setq org-html-mathjax-options
-          '((path "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"))))
-#+END_SRC
+    (add-to-list 'org-html-mathjax-options '(path "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML")))
+  #+END_SRC
 
 ** Super/Sub-scripting
 

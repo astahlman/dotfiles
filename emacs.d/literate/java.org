@@ -24,16 +24,6 @@ Set the location of =eclipse= and the =eclimd= executable
     '(eclim-executable "/Applications/Eclipse.app/Contents/Eclipse/eclim"))
 #+END_SRC
 
-** autocomplete
-
-Set up eclim as a source for autocompletion.
-
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'java-mode-hook (lambda ()
-                              (require 'ac-emacs-eclim-source)
-                              (ac-emacs-eclim-config)))
-#+END_SRC
-
 ** Error Messages
 
 Display error messages in the echo area when cursor is positioned on

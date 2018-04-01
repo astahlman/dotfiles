@@ -68,12 +68,6 @@ Log nrepl messages so we can debug when things go wrong.
 (setq nrepl-log-messages t)
 #+END_SRC
 
-Show the signature of the current function in the echo area.
-
-#+BEGIN_SRC emacs-lisp
-(add-hook 'cider-mode-hook 'cider-turn-on-eldoc-mode)
-#+END_SRC
-
 Lookup documentation for =thing-at-point= with =C-h SPC=.
 
 #+BEGIN_SRC emacs-lisp
