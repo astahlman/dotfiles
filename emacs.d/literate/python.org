@@ -17,13 +17,13 @@ Turn on flycheck in the Python major mode.
 Install the jedi server (just once).
 
 #+BEGIN_SRC emacs-lisp :cache yes :results none
-(jedi:install-server)
+;;(jedi:install-server)
 #+END_SRC
 
 Connect to the server anytime we are in Python mode.
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'python-mode-hook 'jedi:setup)
+  ;;(add-hook 'python-mode-hook 'jedi:setup)
 #+END_SRC
 
 * Rope                                                         :experimental:
@@ -41,4 +41,52 @@ I installed Pymacs from source and Rope via pip.
 	(require 'pymacs)
 	(pymacs-load "ropemacs" "rope-")))
 #+END_SRC
+
+* lsp                                                          :experimental:
+
+#+BEGIN_SRC emacs-lisp
+  (require 'lsp-mode)
+  (require 'lsp-python)
+  (add-hook 'python-mode-hook #'lsp-python-enable)
+  ;; Make sure pyls is on exec-path
+  (setq exec-path (append exec-path '("/Users/andrewstahlman/workplace/python-language-server/venv/bin/")))
+#+END_SRC
+
+#+RESULTS:
+| /usr/local/bin/ | /usr/bin/ | /bin/ | /usr/sbin/ | /sbin/ | /Library/TeX/texbin/ | /opt/X11/bin/ | /Applications/Emacs.app/Contents/MacOS/bin-x86_64-10_9/ | /Applications/Emacs.app/Contents/MacOS/libexec-x86_64-10_9/ | /Users/andrewstahlman/src/etl/bin/ | /Users/andrewstahlman/tools/fzf/bin/ | /Users/andrewstahlman/dotfiles/scripts/ | /Users/andrewstahlman/dotfiles/scripts/lyft_local/ | /Users/andrewstahlman/dotfiles/scripts/archive_local/ | nil | /Applications/Emacs.app/Contents/MacOS/libexec/ | /Users/andrewstahlman/workplace/python-language-server/venv/bin/ | /Users/andrewstahlman/workplace/python-language-server/venv/bin/ |
+
+Quick overview of how this works:
+
+- lsp-mode defines the Emacs lsp client
+- lsp-python is just a thin wrapper around lsp-mode that defines how
+  to launch the language server: pyls
+- pyls is the [[https://github.com/palantir/python-language-server][python-language-server]], which I've installed from source
+  in =~/workplace=
+
+** Cheatsheet
+
+- Completion (with helm) - =C-:=
+- Goto definition - =g-d=
+- Find references - =g-r=
+- Open imenu (with helm) - =g o=
+
+#+BEGIN_SRC emacs-lisp
+(define-key evil-motion-state-map (kbd "g r") 'xref-find-references)
+#+END_SRC
+
+#+RESULTS:
+: xref-find-references
+
+*** imenu
+
+Get a quick overview of the contents of a file using imenu in a popup,
+with searching and completion provided by helm.
+
+#+BEGIN_SRC emacs-lisp
+(define-key evil-motion-state-map (kbd "g o") 'helm-imenu)
+#+END_SRC
+
+#+RESULTS:
+: helm-imenu
+
 

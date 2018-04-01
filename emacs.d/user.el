@@ -1,9 +1,11 @@
 ;; TODO: Bootstrap this...
 (require 'epl)
+(require 'cl)
 
 ;; This is where your customizations should live
 (setq my-packages
       '(ac-math
+        annotate
         async
         auctex
         auto-complete
@@ -12,6 +14,7 @@
         cider
         cl-lib
         cljdoc
+        clj-refactor
         clojure-mode
         clojure-test-mode
         company
@@ -40,6 +43,7 @@
         google-translate
         helm
         helm-ag
+        helm-company
         helm-git-grep
         helm-gtags  ; helm integration with GNU global
         helm-ls-git
@@ -52,7 +56,10 @@
         key-chord
         langtool
         latex-preview-pane
-        magit
+        lsp-mode
+        lsp-python
+        ;;magit
+        magit-gh-pulls
         markdown-mode
         math-symbol-lists
         muse
@@ -79,6 +86,7 @@
         smex
         solarized-theme
         sr-speedbar
+        with-editor
         writegood-mode
         w3m
         yaml-mode
@@ -371,8 +379,11 @@
 (require 'evil)
 (evil-mode 1)
 
+;; start the server on init
+(server-start)
+
 ;; Load all of our literate configuration
-(dolist (f (directory-files "~/.emacs.d/literate" t "\\.org$"))
+(dolist (f (directory-files "~/.emacs.d/literate" t "^[^\\.]+.org$"))
   (message "Loading customizations from %s..." f)
   (org-babel-load-file f))
 

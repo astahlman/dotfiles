@@ -24,6 +24,15 @@ Always highlight trailing whitespace and mixed spaces and tabs.
   (setq whitespace-style '(face trailing space-before-tab space-after-tab))
 #+END_SRC
 
+Put a newline at the end of the file before saving.
+
+#+BEGIN_SRC emacs-lisp
+  (setq require-final-newline t)
+#+END_SRC
+
+#+RESULTS:
+: t
+
 
 * Auto-completion
 
@@ -33,6 +42,19 @@ Turn on company mode in all buffers.
   (require 'company)
   (add-hook 'after-init-hook 'global-company-mode)
 #+END_SRC
+
+Use helm as fronted for completion.
+
+#+BEGIN_SRC emacs-lisp
+(eval-after-load 'company
+  '(progn
+     (define-key company-mode-map (kbd "C-:") 'helm-company)
+     (define-key company-active-map (kbd "C-:") 'helm-company)))
+#+END_SRC
+
+#+RESULTS:
+: helm-company
+
 
 * Paredit
 
@@ -115,6 +137,16 @@ Invoke =helm-git-grep= from other helm.
 (eval-after-load 'helm
   '(define-key helm-map (kbd "C-c g") 'helm-git-grep-from-helm))
 #+END_SRC
+
+** Navigating with the mark ring
+
+
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-h SPC") 'helm-all-mark-rings)
+#+END_SRC
+
+#+RESULTS:
+: helm-all-mark-rings
 
 * YAML
 
