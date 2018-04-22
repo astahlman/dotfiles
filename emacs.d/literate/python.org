@@ -76,3 +76,14 @@ with searching and completion provided by helm.
 : helm-imenu
 
 
+
+* venvwrapper
+
+#+BEGIN_SRC emacs-lisp
+  (require 'virtualenvwrapper)
+  (venv-initialize-interactive-shells) ;; if you want interactive shell support
+  (venv-initialize-eshell) ;; if you want eshell support
+#+END_SRC
+
+#+RESULTS:
+: Eshell virtualenv support initialized.

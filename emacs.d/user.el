@@ -85,6 +85,7 @@
         smex
         solarized-theme
         sr-speedbar
+        virtualenvwrapper
         with-editor
         writegood-mode
         w3m
